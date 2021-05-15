@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import Categoria from '@/src/components/Categoria'
+import Categoria from '@/components/Categoria/Categoria.vue'
 export default {
     name: "CategoriaView",
     components: {

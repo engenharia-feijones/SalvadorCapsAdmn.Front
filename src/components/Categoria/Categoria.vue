@@ -9,9 +9,17 @@
           >
         </v-row>
       </v-card-title>
+      <v-card-text>
+        <v-col cols="12" md="4">
+            <v-row justify="start" justify-md="space-around" align="center">
+              <v-autocomplete :items="filterData" v-model="filter" clearable ></v-autocomplete>
+            <v-btn class="mx-3" @click="filterCategory">Buscar</v-btn>
+            </v-row>
+        </v-col>
+      </v-card-text>
       <v-expansion-panels>
         <v-expansion-panel
-          v-for="(categoria, index) in categorias"
+          v-for="(categoria, index) in filterActive ? filterCategorias : categorias"
           :key="index"
         >
           <v-expansion-panel-header>{{
@@ -108,22 +116,18 @@ export default {
     dialogDeletarCategoria: false,
     desativarBtn: true,
     editarModal: false,
+    filter: null,
+    filterActive: false,
 
-    cabecalho: [
-      { text: "Categoria", align: "start", value: "name" },
-      {
-        text: "Imagem Desktop",
-        align: "Start",
-        value: "desktopSpotlightImage",
-      },
-      { text: "Imagem Mobile", align: "Start", value: "mobileSpotlightImage" },
-      { text: "", align: "Start", value: "acoes" },
-    ],
+
     categorias: [{ nome: "teste", desktop: "a", mobile: "b" }],
+    filterData: [],
+    filterCategorias: [],
     deletarCategoriaTemp: {},
     editarCategoriaTemp: {},
     categoryDetail: {},
     categoryTemp: {},
+    
   }),
 
   methods: {
@@ -133,10 +137,16 @@ export default {
       console.log(this.deletarCategoriaTemp.id);
     },
 
+    filterCategory() {
+      this.filterActive = this.filter ? true: false
+      this.filterCategorias = this.categorias.filter(category => category.name === this.filter)
+      console.log(this.filterCategorias)
+    },
+
     async deletarCategoria() {
       await axios.delete(
         `http://localhost:5000/api/Category/${this.deletarCategoriaTemp.id}`
-      );
+      ).catch(() => alert("Existem detalhes sobre essa categoria."));
       this.deletarCategoriaTemp = null;
       this.dialogDeletarCategoria = !this.dialogDeletarCategoria;
       this.getCategorias();
@@ -146,7 +156,8 @@ export default {
       await axios
         .get(`http://localhost:5000/api/Category`)
         .then((response) => (this.categorias = response.data));
-      console.log(this.categorias);
+      this.categorias.map((categoria) => { this.filterData = [...this.filterData, categoria.name ] })
+      console.log(this.filterData)
     },
 
     async putCategoria(infos) {
@@ -163,6 +174,10 @@ export default {
         .catch((response) => console.log(response));
       this.categoryTemp = categoria;
     },
+  },
+
+  watch: {
+  
   },
 
   created() {

@@ -1,8 +1,9 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
-import Marca from '@/components/Marca/Marca'
-import Categoria from '@/components/Categoria/Categoria'
+import Marca from '@/views/Marca/Marca'
+import Categoria from '@/views/Categoria/CategoriaView'
+import Produtos from '@/views/Produtos/ProdutosView'
 Vue.use(VueRouter)
 
 const routes = [
@@ -15,6 +16,11 @@ const routes = [
         path: '/categoria',
         name: 'Categoria',
         component: Categoria
+    },
+    {
+        path: '/produtos',
+        name: "Produto",
+        component: Produtos
     }
 ]
 

@@ -8,7 +8,7 @@
         <v-col cols="12" md="2"
           ><v-btn block :to="{ name: 'Categoria' }">2. Categoria</v-btn></v-col
         >
-        <v-col cols="12" md="2"><v-btn block>3. Produtos</v-btn></v-col>
+        <v-col cols="12" md="2"><v-btn block :to="{ name: 'Produto' }">3. Produtos</v-btn></v-col>
       </v-row>
     </v-container>
     <v-main>
