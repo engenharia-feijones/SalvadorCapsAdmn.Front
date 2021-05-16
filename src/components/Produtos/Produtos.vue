@@ -48,7 +48,7 @@
       </v-card-title>
       <v-list>
         <v-list-group
-          v-for="(product, index) in filterResults ? filtredProducts : products"
+          v-for="(product, index) in (filterResults ? filtredProducts : products)"
           :key="index"
         >
           <template v-slot:activator>
@@ -92,13 +92,13 @@
 
     <!-- START POST PRODUCT -->
     <v-dialog v-model="newModal" v-if="newModal" max-width="400px">
-      <ProdutosFormulario />
+      <ProdutosFormulario @close-modal="closeModal()" />
     </v-dialog>
     <!-- END POST PRODUCT -->
 
     <!-- START DELETE PRODUCT -->
     <v-dialog v-model="deleteModal" max-width="800px">
-      <v-card height="150px">
+      <v-card>
         <v-card-title>Deletar Produto</v-card-title>
         <v-card-text
           >Não sera possivel recuperar os dados ja cadastrados apos deletar esse
@@ -131,12 +131,16 @@
       </v-card>
     </v-dialog>
     <!-- END DELETE PRODUCT ERROR -->
+
+    <Loading v-if="loading" />
   </v-container>
 </template>
 
 <script>
-import ProdutosFormulario from "./ProdutosFormulario";
 import axios from "axios";
+import ProdutosFormulario from "./ProdutosFormulario";
+import Loading from "@/components/Common/Loading";
+
 export default {
   name: "Produtos",
   data: () => ({
@@ -144,6 +148,7 @@ export default {
     deleteModal: false,
     errorModal: false,
     filterResults: false,
+    loading: true,
 
     products: [],
     filtredProducts: [],
@@ -185,7 +190,6 @@ export default {
 
     handleSearchData() {
       this.searchName = this.searchName.trim();
-      // Check if selectedCode is equals to "" if none execute the right side short-circuit
       this.selectedCode =
         this.selectedCode === "" ? this.selectedCode : +this.selectedCode;
     },
@@ -196,10 +200,13 @@ export default {
     },
 
     async getProdutos() {
-      await axios
-        .get(`http://localhost:5000/api/Product`)
-        .then((response) => (this.products = response.data));
-      console.log(this.products);
+      this.loading = true;
+      await axios.get(`http://localhost:5000/api/Product`).then(async (response) => {
+         this.products = await response.data;
+        console.log(response.data);
+        this.loading = false;
+      });
+      console.log("get")
     },
 
     async deleteProduct() {
@@ -207,6 +214,9 @@ export default {
         .delete(`http://localhost:5000/api/Product/${this.productTemp.id}`)
         .then(() => {
           this.deleteModal = !this.deleteModal;
+          this.filtredProducts = this.filtredProducts.filter(
+            (product) => product.id !== this.productTemp.id
+          );
           this.getProdutos();
         })
         .catch(() => {
@@ -223,15 +233,22 @@ export default {
         );
       });
     },
+
+    async closeModal() {
+      await this.getProdutos();
+      this.newModal = !this.newModal;
+      this.$forceUpdate()
+    },
   },
 
-  created() {
-    this.getProdutos();
+  mounted() {
     this.getCategory();
+    this.getProdutos();
   },
 
   components: {
     ProdutosFormulario,
+    Loading,
   },
 };
 </script>

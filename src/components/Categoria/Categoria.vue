@@ -11,15 +11,21 @@
       </v-card-title>
       <v-card-text>
         <v-col cols="12" md="4">
-            <v-row justify="start" justify-md="space-around" align="center">
-              <v-autocomplete :items="filterData" v-model="filter" clearable ></v-autocomplete>
+          <v-row justify="start" justify-md="space-around" align="center">
+            <v-autocomplete
+              :items="filterData"
+              v-model="filter"
+              clearable
+            ></v-autocomplete>
             <v-btn class="mx-3" @click="filterCategory">Buscar</v-btn>
-            </v-row>
+          </v-row>
         </v-col>
       </v-card-text>
       <v-expansion-panels>
         <v-expansion-panel
-          v-for="(categoria, index) in filterActive ? filterCategorias : categorias"
+          v-for="(categoria, index) in filterActive
+            ? filterCategorias
+            : categorias"
           :key="index"
         >
           <v-expansion-panel-header>{{
@@ -38,10 +44,7 @@
               <v-btn x-small text class="mr-2" @click="putCategoria(categoria)">
                 <v-icon>mdi-pencil</v-icon> Editar
               </v-btn>
-              <v-btn
-                x-small
-                text
-                class="mr-2"
+              <v-btn x-small text class="mr-2"
                 @click="loadCategoriaDetail(categoria)"
                 ><v-icon>mdi-arrow-down-bold-circle</v-icon> Detalhes
               </v-btn>
@@ -67,14 +70,14 @@
     <v-dialog v-model="editarModal" max-width="800px">
       <Formulario
         :editarCategoria="editarCategoriaTemp"
-        @fechar-formulario="editarModal = false"
+        @fechar-formulario="editarModal = false; getCategorias()"
         v-if="editarModal"
       />
     </v-dialog>
     <!-- END PUT CATEGORY -->
     <!-- START DELETE DIALOG -->
     <v-dialog v-model="dialogDeletarCategoria" max-width="800px">
-      <v-card height="150px">
+      <v-card>
         <v-card-title>Deletar Categoria</v-card-title>
         <v-card-text
           >Não sera possivel recuperar os dados ja cadastrados apos deletar essa
@@ -94,7 +97,7 @@
       </v-card>
     </v-dialog>
     <!-- END DELETE DIALOG -->
-
+    <Loading v-if="loading" />
     <CategoriaDetail
       :categoryDetails="categoryDetail"
       :category="categoryTemp"
@@ -103,22 +106,24 @@
     />
   </v-container>
 </template>
+
 <script>
 import axios from "axios";
 import Formulario from "./Formulario";
-import CategoriaDetail from './CategoriaDetail/CategoriaDetail'
+import CategoriaDetail from "./CategoriaDetail/CategoriaDetail";
+import Loading from "@/components/Common/Loading";
 
 export default {
   name: "Categoria",
 
   data: () => ({
+    loading: false,
     dialog: false,
     dialogDeletarCategoria: false,
     desativarBtn: true,
     editarModal: false,
     filter: null,
     filterActive: false,
-
 
     categorias: [{ nome: "teste", desktop: "a", mobile: "b" }],
     filterData: [],
@@ -127,37 +132,42 @@ export default {
     editarCategoriaTemp: {},
     categoryDetail: {},
     categoryTemp: {},
-    
   }),
 
   methods: {
     confirmarDeletarCategoria(item) {
       this.dialogDeletarCategoria = !this.dialogDeletarCategoria;
       this.deletarCategoriaTemp = item;
-      console.log(this.deletarCategoriaTemp.id);
     },
 
     filterCategory() {
-      this.filterActive = this.filter ? true: false
-      this.filterCategorias = this.categorias.filter(category => category.name === this.filter)
-      console.log(this.filterCategorias)
+      this.filterActive = this.filter ? true : false;
+      this.filterCategorias = this.categorias.filter(
+        (category) => category.name === this.filter
+      );
     },
 
     async deletarCategoria() {
-      await axios.delete(
-        `http://localhost:5000/api/Category/${this.deletarCategoriaTemp.id}`
-      ).catch(() => alert("Existem detalhes sobre essa categoria."));
+      await axios
+        .delete(
+          `http://localhost:5000/api/Category/${this.deletarCategoriaTemp.id}`
+        )
+        .catch(() => alert("Existem detalhes sobre essa categoria."));
+      // TODO: CREATE A MODAL FOR SHOW THE ERROR.
       this.deletarCategoriaTemp = null;
       this.dialogDeletarCategoria = !this.dialogDeletarCategoria;
+      this.loading = !this.loading;
       this.getCategorias();
     },
 
     async getCategorias() {
-      await axios
-        .get(`http://localhost:5000/api/Category`)
-        .then((response) => (this.categorias = response.data));
-      this.categorias.map((categoria) => { this.filterData = [...this.filterData, categoria.name ] })
-      console.log(this.filterData)
+      await axios.get(`http://localhost:5000/api/Category`).then((response) => {
+        this.categorias = response.data;
+        this.loading = false;
+      });
+      this.categorias.map((categoria) => {
+        this.filterData = [...this.filterData, categoria.name];
+      });
     },
 
     async putCategoria(infos) {
@@ -176,9 +186,7 @@ export default {
     },
   },
 
-  watch: {
-  
-  },
+  watch: {},
 
   created() {
     this.getCategorias();
@@ -186,7 +194,8 @@ export default {
 
   components: {
     Formulario,
-    CategoriaDetail
+    CategoriaDetail,
+    Loading,
   },
 };
 </script>
