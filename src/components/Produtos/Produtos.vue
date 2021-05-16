@@ -70,7 +70,7 @@
                 </v-list-item-action>
                 <v-list-item-action>
                   <v-row justify="space-around" justify-md="start">
-                    <v-btn x-small text class="mr-2">
+                    <v-btn x-small text class="mr-2" @click="editProduct(product)">
                       <v-icon>mdi-pencil</v-icon> Editar
                     </v-btn>
                     <v-btn
@@ -132,6 +132,14 @@
     </v-dialog>
     <!-- END DELETE PRODUCT ERROR -->
 
+    <!-- START PUT FORM  -->
+    
+        <v-dialog v-model="editModal" v-if="editModal" max-width="400px">
+            <ProdutosFormulario :editProduct="productTemp" @close-modal="closeModal()" />
+        </v-dialog>
+
+    <!-- END PUT FORM -->
+
     <Loading v-if="loading" />
   </v-container>
 </template>
@@ -147,12 +155,15 @@ export default {
     newModal: false,
     deleteModal: false,
     errorModal: false,
+    editModal: false,
     filterResults: false,
     loading: true,
 
     products: [],
     filtredProducts: [],
     filterCategory: [],
+    
+    productTemp: {},
 
     searchName: "",
     selectedCode: "",
@@ -199,9 +210,14 @@ export default {
       this.productTemp = product;
     },
 
+    editProduct(temp) {
+        this.editModal = !this.editModal
+        this.productTemp = temp
+    },
+
     async getProdutos() {
       this.loading = true;
-      await axios.get(`http://localhost:5000/api/Product`).then(async (response) => {
+      await axios.get(`http://localhost:5000/api/Product`).then(async response => {
          this.products = await response.data;
         console.log(response.data);
         this.loading = false;
@@ -236,8 +252,8 @@ export default {
 
     async closeModal() {
       await this.getProdutos();
-      this.newModal = !this.newModal;
-      this.$forceUpdate()
+      this.newModal = false;
+      this.editModal = false;
     },
   },
 

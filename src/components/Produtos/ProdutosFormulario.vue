@@ -122,7 +122,10 @@
             <v-btn x-small text @click="closeModal()"
               ><v-icon>mdi-close</v-icon>Cancelar</v-btn
             >
-            <v-btn x-small text @click="validateForm()"
+            <v-btn x-small text @click="validateForm()" v-if="editProduct"
+              ><v-icon>mdi-check</v-icon>Editar</v-btn
+            >
+            <v-btn x-small text @click="validateForm()" v-else
               ><v-icon>mdi-check</v-icon>Salvar</v-btn
             >
           </v-row>
@@ -139,6 +142,7 @@ export default {
   name: "ProdutosFormulario",
   data: () => ({
     produto: {
+      brand: "",
       brandID: "",
       code: "",
       name: "",
@@ -173,6 +177,12 @@ export default {
     brandsNames: [],
   }),
 
+  props: {
+    editProduct: {
+      Type: Object,
+    },
+  },
+
   methods: {
     cleanForm() {
       this.produto = {
@@ -202,17 +212,20 @@ export default {
       this.imagePreview = null;
     },
 
-    validateForm() {
+    async validateForm() {
       // this.filtredDetail = this.categorysDetail.filter(
       //   (cat) => cat.categoryID === category.id
       // );
-     if(this.$refs.form.validate()) {
-        this.postProduct();
-        this.closeModal()
-     }
-    },
+      if (this.$refs.form.validate()) {
+        if (this.editProduct) {
+          await this.putProduct();
+        } else {
+          await this.postProduct();
+        }
 
-  
+        this.closeModal();
+      }
+    },
 
     async getBrands() {
       await axios
@@ -235,7 +248,6 @@ export default {
             (response) => (this.categorys[index]["detail"] = [...response.data])
           );
         this.$forceUpdate();
-        console.log(this.categorys[index]["detail"]);
       });
     },
 
@@ -247,10 +259,20 @@ export default {
         externalName: this.produto.externalName,
         description: this.produto.description,
         price: +this.produto.price,
-        imageID: this.imagePreviewDetails.imageID
+        imageID: this.imagePreviewDetails.imageID,
       });
+    },
 
-      console.log("post")
+    async putProduct() {
+      await axios.put(`http://localhost:5000/api/Product/${this.produto.id}`, {
+        brandID: +this.produto.brandID,
+        code: +this.produto.code,
+        name: this.produto.name,
+        externalName: this.produto.externalName,
+        description: this.produto.description,
+        price: +this.produto.price,
+        imageID: this.imagePreviewDetails.imageID,
+      });
     },
   },
 
@@ -259,12 +281,28 @@ export default {
       this.produto.brandID = this.brands.filter(
         (brand) => brand.name === this.produto.brand
       )[0]?.id;
+      console.log("a");
     },
   },
 
-  created() {
-    this.getCategorys();
-    this.getBrands();
+  async mounted() {
+    await this.getCategorys();
+    await this.getBrands();
+    this.produto = this.editProduct ?? {
+      brand: "",
+      brandID: "",
+      code: "",
+      name: "",
+      externalName: "",
+      description: "",
+      price: "",
+      imageID: "",
+      productCategoryDetails: [],
+    };
+
+    this.produto.brand = this.brands.filter(
+      (brand) => brand.id === this.produto.brandID
+    )[0]?.name;
   },
 };
 </script>
