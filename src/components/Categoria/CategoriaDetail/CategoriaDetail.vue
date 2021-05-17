@@ -1,5 +1,5 @@
 <template>
-  <v-card class="mx-auto" max-width="1400px">
+  <v-card class="mx-auto" max-width="90%">
     <v-card-title class="mb-3">
       <v-row justify="start" justify-md="start" align="baseline">
         <h4 class="ma-3">Detalhes da Categoria: {{ category }}</h4>
@@ -8,6 +8,7 @@
         >
       </v-row>
     </v-card-title>
+    <div v-if="isMobile">
     <v-list>
       <v-list-group v-for="(detail, index) in details" :key="index">
         <template v-slot:activator>
@@ -40,7 +41,31 @@
         </v-card>
       </v-list-group>
     </v-list>
+    </div>
 
+    <div v-else>
+      <v-data-table
+          :headers="headers"
+          :items="details"
+          hide-default-footer
+          no-data-text="Nenhum Detalhe do Produto Encontrado."
+        >
+          <template v-slot:[`item.titleIcon`]="{ item }" >
+            <v-img :src="item.titleIcon" 
+            height="7rem" width="7rem"
+            alt="Imagem não encontrada"></v-img>
+          </template>
+
+          <template v-slot:[`item.actions`]="{ item }">
+            <v-row justify="center" class="py-1 mt-1">
+              <v-btn text @click="putCategoryDetail(item)"><v-icon>mdi-pencil</v-icon> Editar</v-btn>
+            </v-row>
+            <v-row justify="center" class="py-1 mb-1">
+              <v-btn text @click="confirmarDeleteCategoryDetail(item)"><v-icon>mdi-delete</v-icon> Deletar</v-btn>
+            </v-row>
+          </template>
+      </v-data-table>
+    </div>
     <Loading v-if="loading" />
 
     <v-dialog v-model="dialogDeletarDetailCategory" max-width="400px">
@@ -96,6 +121,11 @@ export default {
   data: () => ({
     details: [],
     categorys: [],
+    headers: [
+      { text: "Detalhe", align: "center", value: "name" },
+      { text: "Icone", align: "center", value: ""},
+      { text: "Ações", align: "center", value: "actions" },
+    ],
 
     detailTemp: {},
     categoryDetailTemp: null,
@@ -168,6 +198,15 @@ export default {
       return this.categorys.filter(
         (category) => category.id === +this.$route.params.id
       )[0]?.name;
+    },
+
+    isMobile() {
+      switch (this.$vuetify.breakpoint.name) {
+        case "xs":
+          return true;
+        default:
+          return false;
+      }
     },
   },
 

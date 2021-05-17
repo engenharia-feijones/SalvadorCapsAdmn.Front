@@ -214,10 +214,6 @@ export default {
       this.deletarCategoriaTemp = item;
     },
 
-    teste(item) {
-      console.log(item)
-    },
-
     filterCategory() {
       this.filterActive = this.filter ? true : false;
       this.filterCategorias = this.categorias.filter(
@@ -260,7 +256,6 @@ export default {
     isMobile() {
       switch (this.$vuetify.breakpoint.name) {
         case "xs":
-        case "sm":
           return true;
         default:
           return false;
