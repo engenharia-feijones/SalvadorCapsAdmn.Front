@@ -162,7 +162,7 @@ export default {
         this.filtredProducts = this.products.filter(
           (product) =>
             product.code === this.selectedCode &&
-            product.name.includes(this.searchName)
+            product.name.toLowerCase().includes(this.searchName.toLowerCase())
         );
       } else if (this.selectedCode !== "" || this.searchName !== "") {
         if (this.selectedCode !== "") {
@@ -171,7 +171,7 @@ export default {
           );
         } else if (this.searchName !== "") {
           this.filtredProducts = this.products.filter((product) =>
-            product.name.includes(this.searchName)
+            product.name.toLowerCase().includes(this.searchName.toLowerCase())
           );
         }
       }

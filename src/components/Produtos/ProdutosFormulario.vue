@@ -102,20 +102,44 @@
             </v-col>
           </v-row>
         </v-col>
-        <!-- <v-col cols="12">
-        <v-btn block style="pointer-events: none;">Categoria</v-btn> 
-      </v-col>
-      <v-col cols="12">
-        <v-expansion-panels>
-          <v-expansion-panel v-for="(category, index) in categorys" :key="index">
-            <v-expansion-panel-header>{{ category.name }}</v-expansion-panel-header>
-            <div v-if="category.detail">
-            <v-expansion-panel-content v-for="(detail, index) in category.detail" :key="index"><v-checkbox :label="detail.name" :value="detail.id"></v-checkbox></v-expansion-panel-content>
+        <v-col cols="12">
+          <v-btn block style="pointer-events: none">Categoria</v-btn>
+        </v-col>
 
-            </div>
-          </v-expansion-panel>
-        </v-expansion-panels>
-      </v-col> -->
+        <v-col cols="12">
+          <v-card-text>
+            <label>Detalhes Selecionados:</label>
+          </v-card-text>
+          <v-chip-group column v-model="removeChip"   >
+            <v-chip  v-for="(chip, index) in chipDetail" :key="index"
+            @dblclick="removeDetailChip(index)"
+            >{{ chip.detail.name }}</v-chip>
+          </v-chip-group>
+        </v-col>
+
+        <v-col cols="12">
+          <v-expansion-panels flat>
+            <v-expansion-panel
+              v-for="(category, index) in categorys"
+              :key="index"
+            >
+              <v-expansion-panel-header>{{
+                category.name
+              }}</v-expansion-panel-header>
+              <div v-if="category.detail">
+                <v-expansion-panel-content
+                  v-for="(detail, index) in category.detail"
+                  :key="index"
+                  ><v-checkbox
+                    v-model="selectedDetail"
+                    :label="detail.name"
+                    :value="{'detail': { 'id': detail.id,  'name': detail.name } }"
+                  ></v-checkbox
+                ></v-expansion-panel-content>
+              </div>
+            </v-expansion-panel>
+          </v-expansion-panels>
+        </v-col>
 
         <v-card-actions class="mt-5">
           <v-row justify="end">
@@ -167,11 +191,14 @@ export default {
 
     descriptionRules: [(desc) => !!desc || "Insira a descrição do produto"],
 
+    removeChip: [], 
     imagePreview: null,
     imagePreviewDetails: {},
 
     categorys: [{ detail: "" }],
     categorysDetail: [],
+    selectedDetail: [],
+    chipDetail: [],
     filtredDetail: [],
     brands: [],
     brandsNames: [],
@@ -197,6 +224,17 @@ export default {
       };
     },
 
+    removeDetailChip(chipIndex) {
+      this.selectedDetail = [ ...this.selectedDetail.filter((detail, index) => index != chipIndex ) ]
+      alert()
+    },
+
+    insertDetailIntoProduct() {
+      this.selectedDetail.map((detail) => {
+        this.produto.productCategoryDetails = [...this.produto.productCategoryDetails, { "categoryDetailID":  detail.detail.id } ]
+      })
+    },
+
     closeModal() {
       this.$emit("close-modal");
       this.cleanForm();
@@ -216,15 +254,19 @@ export default {
       // this.filtredDetail = this.categorysDetail.filter(
       //   (cat) => cat.categoryID === category.id
       // );
-      if (this.$refs.form.validate()) {
-        if (this.editProduct) {
-          await this.putProduct();
-        } else {
-          await this.postProduct();
-        }
+      
+     
+        this.insertDetailIntoProduct()
+      
+      // if (this.$refs.form.validate()) {
+      //   if (this.editProduct) {
+      //     await this.putProduct();
+      //   } else {
+      //     await this.postProduct();
+      //   }
 
-        this.closeModal();
-      }
+      //   this.closeModal();
+      // }
     },
 
     async getBrands() {
@@ -260,6 +302,7 @@ export default {
         description: this.produto.description,
         price: +this.produto.price,
         imageID: this.imagePreviewDetails.imageID,
+        productCategoryDetails: this.produto.productCategoryDetails
       });
     },
 
@@ -272,6 +315,7 @@ export default {
         description: this.produto.description,
         price: +this.produto.price,
         imageID: this.imagePreviewDetails.imageID,
+        productCategoryDetails: this.produto.productCategoryDetails
       });
     },
   },
@@ -281,8 +325,10 @@ export default {
       this.produto.brandID = this.brands.filter(
         (brand) => brand.name === this.produto.brand
       )[0]?.id;
-      console.log("a");
     },
+     selectedDetail() {
+        this.chipDetail = [ ...this.selectedDetail ]
+      }
   },
 
   async mounted() {
