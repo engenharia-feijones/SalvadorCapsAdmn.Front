@@ -48,7 +48,7 @@
       </v-card-title>
       <v-list>
         <v-list-group
-          v-for="(product, index) in (filterResults ? filtredProducts : products)"
+          v-for="(product, index) in filterResults ? filtredProducts : products"
           :key="index"
         >
           <template v-slot:activator>
@@ -70,7 +70,12 @@
                 </v-list-item-action>
                 <v-list-item-action>
                   <v-row justify="space-around" justify-md="start">
-                    <v-btn x-small text class="mr-2" @click="editProduct(product)">
+                    <v-btn
+                      x-small
+                      text
+                      class="mr-2"
+                      @click="editProduct(product)"
+                    >
                       <v-icon>mdi-pencil</v-icon> Editar
                     </v-btn>
                     <v-btn
@@ -96,24 +101,26 @@
     </v-dialog>
     <!-- END POST PRODUCT -->
 
+    <!-- START PUT FORM  -->
+    <v-dialog v-model="editModal" v-if="editModal" max-width="400px">
+      <ProdutosFormulario
+        :editProduct="productTemp"
+        @close-modal="closeModal()"
+      />
+    </v-dialog>
+    <!-- END PUT FORM -->
+
     <v-dialog v-model="deleteModal" max-width="800px">
-      <DeleteModal @close-modal="deleteModal = false" 
+      <DeleteModal
+        @close-modal="deleteModal = false"
         @action="deleteProduct()"
         categoria="Produto"
       />
     </v-dialog>
 
     <v-dialog v-model="errorModal" max-width="800px">
-      <DeleteModalError @close-modal="errorModal = false" /> 
+      <DeleteModalError @close-modal="errorModal = false" />
     </v-dialog>
-
-    <!-- START PUT FORM  -->
-    
-        <v-dialog v-model="editModal" v-if="editModal" max-width="400px">
-            <ProdutosFormulario :editProduct="productTemp" @close-modal="closeModal()" />
-        </v-dialog>
-
-    <!-- END PUT FORM -->
 
     <Loading v-if="loading" />
   </v-container>
@@ -136,10 +143,11 @@ export default {
     filterResults: false,
     loading: true,
 
+
     products: [],
     filtredProducts: [],
     filterCategory: [],
-    
+
     productTemp: {},
 
     searchName: "",
@@ -188,18 +196,20 @@ export default {
     },
 
     editProduct(temp) {
-        this.editModal = !this.editModal
-        this.productTemp = temp
+      this.editModal = !this.editModal;
+      this.productTemp = temp;
     },
 
     async getProdutos() {
       this.loading = true;
-      await axios.get(`http://localhost:5000/api/Product`).then(async response => {
-         this.products = await response.data;
-        console.log(response.data);
-        this.loading = false;
-      });
-      console.log("get")
+      await axios
+        .get(`http://localhost:5000/api/Product`)
+        .then(async (response) => {
+          this.products = await response.data;
+          console.log(response.data);
+          this.loading = false;
+        });
+      console.log("get");
     },
 
     async deleteProduct() {
@@ -244,7 +254,6 @@ export default {
     Loading,
     DeleteModal,
     DeleteModalError,
-
   },
 };
 </script>
