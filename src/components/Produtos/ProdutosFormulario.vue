@@ -110,9 +110,9 @@
           <v-card-text>
             <label>Detalhes Selecionados:</label>
           </v-card-text>
-          <v-chip-group column v-model="removeChip"   >
+          <v-chip-group column >
             <v-chip  v-for="(chip, index) in chipDetail" :key="index"
-            @dblclick="removeDetailChip(index)"
+            @click="removeDetailChip(index)"
             >{{ chip.detail.name }}</v-chip>
           </v-chip-group>
         </v-col>
@@ -226,7 +226,6 @@ export default {
 
     removeDetailChip(chipIndex) {
       this.selectedDetail = [ ...this.selectedDetail.filter((detail, index) => index != chipIndex ) ]
-      alert()
     },
 
     insertDetailIntoProduct() {
