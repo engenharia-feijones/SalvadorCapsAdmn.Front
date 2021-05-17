@@ -96,41 +96,16 @@
     </v-dialog>
     <!-- END POST PRODUCT -->
 
-    <!-- START DELETE PRODUCT -->
     <v-dialog v-model="deleteModal" max-width="800px">
-      <v-card>
-        <v-card-title>Deletar Produto</v-card-title>
-        <v-card-text
-          >Não sera possivel recuperar os dados ja cadastrados apos deletar esse
-          produto.</v-card-text
-        >
-        <v-card-actions>
-          <v-row justify="end" justify-md="start">
-            <v-btn text color="blue" @click="deleteModal = !deleteModal"
-              >Cancelar</v-btn
-            >
-            <v-btn text color="red" @click="deleteProduct()">Deletar</v-btn>
-          </v-row>
-        </v-card-actions>
-      </v-card>
+      <DeleteModal @close-modal="deleteModal = false" 
+        @action="deleteProduct()"
+        categoria="Produto"
+      />
     </v-dialog>
-    <!-- END DELETE PRODUCT -->
 
-    <!-- START DELETE PRODUCT ERROR -->
     <v-dialog v-model="errorModal" max-width="800px">
-      <v-card>
-        <v-card-title>Erro ao deletar o produto</v-card-title>
-        <v-card-text
-          >O Produto está associado a uma categoria no momento.</v-card-text
-        >
-        <v-card-actions>
-          <v-btn text @click="errorModal = !errorModal"
-            ><v-icon>mdi-check</v-icon> Ok</v-btn
-          >
-        </v-card-actions>
-      </v-card>
+      <DeleteModalError @close-modal="errorModal = false" /> 
     </v-dialog>
-    <!-- END DELETE PRODUCT ERROR -->
 
     <!-- START PUT FORM  -->
     
@@ -148,6 +123,8 @@
 import axios from "axios";
 import ProdutosFormulario from "./ProdutosFormulario";
 import Loading from "@/components/Common/Loading";
+import DeleteModal from "@/components/Common/DeleteModal";
+import DeleteModalError from "@/components/Common/DeleteModalError";
 
 export default {
   name: "Produtos",
@@ -265,6 +242,9 @@ export default {
   components: {
     ProdutosFormulario,
     Loading,
+    DeleteModal,
+    DeleteModalError,
+
   },
 };
 </script>
