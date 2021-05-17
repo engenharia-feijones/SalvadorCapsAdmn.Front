@@ -62,7 +62,6 @@
                 text
                 color="blue"
                 @click="
-                  limparModal();
                   fecharModal();
                 "
                 ><v-icon>mdi-close</v-icon>Cancelar</v-btn
@@ -148,7 +147,6 @@ export default {
         titleIcon: this.novaCategoriaDetail.titleIcon,
       });
       // TODO: no futuro lembrar de por os atributos produtos aqui
-      this.limparModal();
       this.fecharModal();
     },
 
@@ -162,7 +160,6 @@ export default {
           titleIcon: this.novaCategoriaDetail.titleIcon,
         }
       );
-      this.limparModal();
       this.fecharModal();
     },
   },
@@ -176,7 +173,7 @@ export default {
   },
 
   created() {
-    this.novaCategoriaDetail = this.categoryDetail ?? {
+    this.novaCategoriaDetail = { ...this.categoryDetail } ?? {
       name: null,
       titleIconID: "",
       titleIcon: "",
