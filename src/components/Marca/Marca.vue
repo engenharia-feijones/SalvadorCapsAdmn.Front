@@ -20,25 +20,36 @@
                                 NEW
                         </v-btn>
                     </template>
-                    <v-card>
+                    <v-card  >
                         <v-card-title>
                             <span class="headline" >Nova Marca</span>
                         </v-card-title>
                         <v-card-text>
                             <v-container>
-                             <v-row>
+                             <v-row justify="center" align="center">
 
-                                <v-col cols="12" sm="4" md="6">
+                                <v-col class="mb-0 pb-0"  cols="12" sm="6" md="12">
                                     <v-text-field
+                                        
+                                        outlined
                                          v-model="editedItem.nome"
                                          label="Nome">
                                     </v-text-field>
                                 </v-col>
 
-                                <v-col cols="12" sm="6" md="12" lg="12">
-                                        <v-btn small fab class="txtBtn">
+                                <v-col class="mb-0 ml-2" >
+                                    <v-row  align="center">
+                                        <v-checkbox value></v-checkbox>
+                                    <p class="mt-4">Promocional</p>
+                                    </v-row>
+                                </v-col>
+
+                                <!-- START UPLOAD IMG DESKTOP -->
+
+                                <v-col  cols="12" sm="6" md="12" lg="12">
+                                    <v-card style="background: #0b7ad1;">
+                                        <v-btn small fab class=" mb-2 mt-2 ml-2 txtBtn">
                                             <v-file-input
-                                               
                                                 @change="previwerimage"
                                                 class="ml-2 mb-2"
                                                 prepend-icon="mdi-remote-desktop"
@@ -46,8 +57,75 @@
                                                 hide-input>
                                             </v-file-input>
                                         </v-btn>
-                                            <label class="ml-4">Imagem Desktop</label>
-                                            <v-img  :src="editedItem.imagemDesktop.url"></v-img>
+                                                <label style="color:white;" class="ml-4">Imagem Desktop</label>
+                                    </v-card>
+                                            <v-card height="auto" class="mt-3" elevation="1">
+                                                    <v-row class="ml-4"  justify="start" >
+                                                        <v-col cols="3">
+                                                            <v-card elevation="0">
+                                                                <v-img class="mt-2" max-height="70px" max-width="70px" :src="editedItem.imagemDesktop.url"></v-img>
+                                                            </v-card>
+                                                        </v-col>
+                                                            <v-col align="start" cols="6">
+                                                                 <p style="font-size:10px" v-if="editedItem.imagemDesktop.nome">{{editedItem.imagemDesktop.nome}}</p>
+                                                            </v-col>
+                                                            <v-col class="btnX" align="end" cols="1">
+                                                                <v-btn @click="editedItem.imagemDesktop.url='',editedItem.imagemDesktop.nome=''" v-if="editedItem.imagemDesktop.url" text fab small>
+                                                                     <v-icon small >mdi-delete</v-icon>
+                                                                </v-btn>
+                                                            </v-col>
+                                                    </v-row>
+                                                    
+                                                    
+                                            </v-card>    
+                                </v-col>
+
+                                <!-- END UPLOAD IMG DESKTOP -->
+
+
+                                <!-- STARTP UPLOAD IMG MOBILE -->
+
+                                <v-col cols="12" sm="6" md="12" lg="12">
+                                <v-card style="background: #0b7ad1;">
+                                    <v-btn small fab class="mb-2 mt-2 ml-2 txtBtn">
+                                        <v-file-input
+                                            @change="previwerImageMob"
+                                            class="ml-2 mb-2"
+                                            prepend-icon="mdi-cellphone"
+                                            filled
+                                            hide-input>
+                                        </v-file-input>
+                                    </v-btn>
+                                        <label style="color:white;" class="ml-4">Imagem Mobile</label>
+                                </v-card>
+                                        <v-card  class="mt-3">
+                                            <v-row class="ml-4" justify="start">
+                                                <v-col cols="3">
+                                                    <v-card  elevation="0" >
+                                                        <v-img class="mt-2"  max-height="70" max-width="70" :src="editedItem.imagemMobile.url"></v-img>
+                                                    </v-card>
+                                                </v-col>
+                                                 <v-col  align="start" cols="6">
+                                                    <p class="mt-2" style=" font-size:10px; width:100px " v-if="editedItem.imagemMobile.nome">{{editedItem.imagemMobile.nome}}</p>
+                                                </v-col>
+                                                <v-col class="btnX" align="end" cols="1">
+                                                    <v-btn @click="editedItem.imagemMobile.url='',editedItem.imagemMobile.nome=''" v-if="editedItem.imagemMobile.url" text fab small>
+                                                        <v-icon small >mdi-delete</v-icon>
+                                                    </v-btn>
+                                                </v-col>
+                                            </v-row>
+
+                                          
+                                        </v-card>
+                                </v-col>
+
+                                <!-- END UPLOAD IMG MOBILE -->
+
+                                <v-col>
+                                    <v-row justify="end">
+                                        <v-btn text> save</v-btn>
+                                        <v-btn text> Cancel</v-btn>
+                                    </v-row>
                                 </v-col>
 
                              </v-row>
@@ -88,14 +166,14 @@ export default {
                     imagemDesktop:
                     {
                         nome:'',
-                        url: 'a'
+                        url: ''
                     }
                         
                     ,
                     imagemMobile:
                     {
                         nome:'',
-                        url:'',
+                        url:''
                     }
 
                     
@@ -107,19 +185,30 @@ export default {
     }),
 
     created() {
-        console.log(this.editedItem.imagemDesktop.url)
     },
     methods:{
-        previwerimage(payload){
-            const file = payload
-      
+        previwerImageMob(payload)
+        {   
+            let file = payload
+          
+            if (this.editedItem.imagemMobile.url==''){
 
-             this.editedItem.imagemDesktop.url=window.URL.createObjectURL(file)
+                this.editedItem.imagemMobile.url=window.URL.createObjectURL(file)
+                 this.editedItem.imagemMobile.nome=file.name
+            }
+
+        },
+        previwerimage(payload)
+        {
+            let file = payload
         
-       
-               
-         
-        }
+           if(this.editedItem.imagemDesktop.url== ''){
+               this.editedItem.imagemDesktop.url=window.URL.createObjectURL(file)
+               this.editedItem.imagemDesktop.nome=file.name
+           }
+
+        },
+     
     }
 
 }
