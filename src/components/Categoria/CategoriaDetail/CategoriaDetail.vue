@@ -54,7 +54,9 @@
     </v-dialog>
 
     <v-dialog v-model="dialogDeleteError">
-      <DeleteModalError @close-modal="dialogDeleteError = !dialogDeleteError" />
+      <DeleteModalError @close-modal="dialogDeleteError = !dialogDeleteError"
+        categoria="o Detalhe"
+       />
     </v-dialog>
 
     <!-- START POST DETAIL -->
