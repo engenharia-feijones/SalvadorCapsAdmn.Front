@@ -1,14 +1,14 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-
 import Marca from '@/views/Marca/Marca'
 import Categoria from '@/views/Categoria/CategoriaView'
+import CategoriaDetail from '@/views/Categoria/CategoriaDetailView'
 import Produtos from '@/views/Produtos/ProdutosView'
 Vue.use(VueRouter)
 
 const routes = [
     {
-        path: '',
+        path: '/',
         name: 'Marca',
         component: Marca
     },
@@ -16,6 +16,11 @@ const routes = [
         path: '/categoria',
         name: 'Categoria',
         component: Categoria
+    },
+    {
+        path: '/categoriaDetalhes/:id',
+        name: 'CategoriaDetalhe',
+        component: CategoriaDetail
     },
     {
         path: '/produtos',

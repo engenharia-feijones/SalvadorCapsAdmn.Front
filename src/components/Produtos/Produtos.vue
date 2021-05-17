@@ -48,7 +48,7 @@
       </v-card-title>
       <v-list>
         <v-list-group
-          v-for="(product, index) in (filterResults ? filtredProducts : products)"
+          v-for="(product, index) in filterResults ? filtredProducts : products"
           :key="index"
         >
           <template v-slot:activator>
@@ -70,7 +70,12 @@
                 </v-list-item-action>
                 <v-list-item-action>
                   <v-row justify="space-around" justify-md="start">
-                    <v-btn x-small text class="mr-2">
+                    <v-btn
+                      x-small
+                      text
+                      class="mr-2"
+                      @click="editProduct(product)"
+                    >
                       <v-icon>mdi-pencil</v-icon> Editar
                     </v-btn>
                     <v-btn
@@ -96,41 +101,26 @@
     </v-dialog>
     <!-- END POST PRODUCT -->
 
-    <!-- START DELETE PRODUCT -->
-    <v-dialog v-model="deleteModal" max-width="800px">
-      <v-card>
-        <v-card-title>Deletar Produto</v-card-title>
-        <v-card-text
-          >Não sera possivel recuperar os dados ja cadastrados apos deletar esse
-          produto.</v-card-text
-        >
-        <v-card-actions>
-          <v-row justify="end" justify-md="start">
-            <v-btn text color="blue" @click="deleteModal = !deleteModal"
-              >Cancelar</v-btn
-            >
-            <v-btn text color="red" @click="deleteProduct()">Deletar</v-btn>
-          </v-row>
-        </v-card-actions>
-      </v-card>
+    <!-- START PUT FORM  -->
+    <v-dialog v-model="editModal" v-if="editModal" max-width="400px">
+      <ProdutosFormulario
+        :editProduct="productTemp"
+        @close-modal="closeModal()"
+      />
     </v-dialog>
-    <!-- END DELETE PRODUCT -->
+    <!-- END PUT FORM -->
 
-    <!-- START DELETE PRODUCT ERROR -->
-    <v-dialog v-model="errorModal" max-width="800px">
-      <v-card>
-        <v-card-title>Erro ao deletar o produto</v-card-title>
-        <v-card-text
-          >O Produto está associado a uma categoria no momento.</v-card-text
-        >
-        <v-card-actions>
-          <v-btn text @click="errorModal = !errorModal"
-            ><v-icon>mdi-check</v-icon> Ok</v-btn
-          >
-        </v-card-actions>
-      </v-card>
+    <v-dialog v-model="deleteModal" max-width="800px">
+      <DeleteModal
+        @close-modal="deleteModal = false"
+        @action="deleteProduct()"
+        categoria="Produto"
+      />
     </v-dialog>
-    <!-- END DELETE PRODUCT ERROR -->
+
+    <v-dialog v-model="errorModal" max-width="800px">
+      <DeleteModalError @close-modal="errorModal = false" />
+    </v-dialog>
 
     <Loading v-if="loading" />
   </v-container>
@@ -140,6 +130,8 @@
 import axios from "axios";
 import ProdutosFormulario from "./ProdutosFormulario";
 import Loading from "@/components/Common/Loading";
+import DeleteModal from "@/components/Common/DeleteModal";
+import DeleteModalError from "@/components/Common/DeleteModalError";
 
 export default {
   name: "Produtos",
@@ -147,12 +139,16 @@ export default {
     newModal: false,
     deleteModal: false,
     errorModal: false,
+    editModal: false,
     filterResults: false,
     loading: true,
+
 
     products: [],
     filtredProducts: [],
     filterCategory: [],
+
+    productTemp: {},
 
     searchName: "",
     selectedCode: "",
@@ -166,7 +162,7 @@ export default {
         this.filtredProducts = this.products.filter(
           (product) =>
             product.code === this.selectedCode &&
-            product.name.includes(this.searchName)
+            product.name.toLowerCase().includes(this.searchName.toLowerCase())
         );
       } else if (this.selectedCode !== "" || this.searchName !== "") {
         if (this.selectedCode !== "") {
@@ -175,7 +171,7 @@ export default {
           );
         } else if (this.searchName !== "") {
           this.filtredProducts = this.products.filter((product) =>
-            product.name.includes(this.searchName)
+            product.name.toLowerCase().includes(this.searchName.toLowerCase())
           );
         }
       }
@@ -199,14 +195,21 @@ export default {
       this.productTemp = product;
     },
 
+    editProduct(temp) {
+      this.editModal = !this.editModal;
+      this.productTemp = temp;
+    },
+
     async getProdutos() {
       this.loading = true;
-      await axios.get(`http://localhost:5000/api/Product`).then(async (response) => {
-         this.products = await response.data;
-        console.log(response.data);
-        this.loading = false;
-      });
-      console.log("get")
+      await axios
+        .get(`http://localhost:5000/api/Product`)
+        .then(async (response) => {
+          this.products = await response.data;
+          console.log(response.data);
+          this.loading = false;
+        });
+      console.log("get");
     },
 
     async deleteProduct() {
@@ -236,8 +239,8 @@ export default {
 
     async closeModal() {
       await this.getProdutos();
-      this.newModal = !this.newModal;
-      this.$forceUpdate()
+      this.newModal = false;
+      this.editModal = false;
     },
   },
 
@@ -249,6 +252,8 @@ export default {
   components: {
     ProdutosFormulario,
     Loading,
+    DeleteModal,
+    DeleteModalError,
   },
 };
 </script>

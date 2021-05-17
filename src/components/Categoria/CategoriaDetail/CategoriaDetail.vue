@@ -2,73 +2,83 @@
   <v-card class="mx-auto" max-width="1400px">
     <v-card-title class="mb-3">
       <v-row justify="start" justify-md="start" align="baseline">
-        <h2 class="ma-3">Detalhes: {{ category.name }}</h2>
-        <v-btn fab small @click="newModal = !newModal" v-if="category.id"
+        <h4 class="ma-3">Detalhes da Categoria: {{ category }}</h4>
+        <v-btn fab small @click="newModal = !newModal" v-if="category"
           ><v-icon>mdi-plus</v-icon></v-btn
         >
       </v-row>
     </v-card-title>
-    <v-expansion-panels>
-      <v-expansion-panel v-for="(detail, index) in detail" :key="index">
-        <v-expansion-panel-header>{{ detail.name }}</v-expansion-panel-header>
-        <v-expansion-panel-content>
-          <v-col cols="12">
-            <p>Icone: {{ detail.titleIcon }}</p>
-          </v-col>
+    <v-list>
+      <v-list-group v-for="(detail, index) in details" :key="index">
+        <template v-slot:activator>
+          <v-list-item-content class="my-1">
+            <v-list-item-title>{{ detail.name }}</v-list-item-title>
+          </v-list-item-content>
+        </template>
 
-          <v-row justify="space-around" justify-md="center">
-            <v-btn x-small text @click="putCategoryDetail(detail)"
-              ><v-icon>mdi-pencil</v-icon>Editar</v-btn
-            >
-            <v-btn x-small text @click="confirmarDeleteCategoryDetail(detail)"
-              ><v-icon>mdi-delete</v-icon>Deletar</v-btn
-            >
-          </v-row>
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-    </v-expansion-panels>
+        <v-card raised class="mt-2 ml-1">
+          <v-list-item>
+            <v-list-item-content>
+              <v-col cols="12">
+                <p>Icone: {{ detail.titleIcon }}</p>
+              </v-col>
+              <v-col cols="12">
+                <v-row justify="space-around" justify-md="center">
+                  <v-btn x-small text @click="putCategoryDetail(detail)"
+                    ><v-icon>mdi-pencil</v-icon>Editar</v-btn
+                  >
+                  <v-btn
+                    x-small
+                    text
+                    @click="confirmarDeleteCategoryDetail(detail)"
+                    ><v-icon>mdi-delete</v-icon>Deletar</v-btn
+                  >
+                </v-row>
+              </v-col>
+            </v-list-item-content>
+          </v-list-item>
+        </v-card>
+      </v-list-group>
+    </v-list>
 
-    <!-- START DELETE MODAL -->
+    <Loading v-if="loading" />
+
     <v-dialog v-model="dialogDeletarDetailCategory" max-width="400px">
-      <v-card height="150px">
-        <v-card-title>Deletar Detalhe</v-card-title>
-        <v-card-text
-          >Não sera possivel recuperar os dados ja cadastrados apos deletar
-          esses detalhes
-          <v-card-actions>
-            <v-row justify="end" justify-md="start">
-              <v-btn
-                text
-                color="blue"
-                @click="
-                  dialogDeletarDetailCategory = !dialogDeletarDetailCategory
-                "
-                >Cancelar</v-btn
-              >
-              <v-btn text color="red" @click="deleteCategoryDetail()"
-                >Deletar</v-btn
-              >
-            </v-row>
-          </v-card-actions>
-        </v-card-text>
-      </v-card>
+      <DeleteModal
+        categoria="Detalhe"
+        @close-modal="
+          dialogDeletarDetailCategory = !dialogDeletarDetailCategory
+        "
+        @action="deleteCategoryDetail()"
+      />
     </v-dialog>
-    <!-- END DELETE MODAL -->
+
+    <v-dialog v-model="dialogDeleteError">
+      <DeleteModalError @close-modal="dialogDeleteError = !dialogDeleteError"
+        categoria="o Detalhe"
+       />
+    </v-dialog>
 
     <!-- START POST DETAIL -->
     <v-dialog v-model="newModal" v-if="newModal" max-width="400px">
       <FormularioDetail
-        :categoryID="category.id"
+        :categoryID="+$route.params.id"
         @fechar-formulario="fecharModal()"
       />
     </v-dialog>
     <!-- END POST DETAIL -->
 
     <!-- START PUT DETAIL -->
-       <v-dialog v-model='editarCategoryDetailModal'  v-if="editarCategoryDetailModal" max-width="400px">
-      <FormularioDetail :categoryDetail="categoryDetailTemp"  :categoryID="categoryDetailTemp.categoryID"
+    <v-dialog
+      v-model="editarCategoryDetailModal"
+      v-if="editarCategoryDetailModal"
+      max-width="400px"
+    >
+      <FormularioDetail
+        :categoryDetail="categoryDetailTemp"
+        :categoryID="categoryDetailTemp.categoryID"
         @fechar-formulario="fecharModalEdit()"
-       />
+      />
     </v-dialog>
     <!-- END PUT DETAIL -->
   </v-card>
@@ -77,43 +87,54 @@
 <script>
 import axios from "axios";
 import FormularioDetail from "./FormularioDetail";
+import Loading from "@/components/Common/Loading";
+import DeleteModal from "@/components/Common/DeleteModal";
+import DeleteModalError from "@/components/Common/DeleteModalError";
 
 export default {
   name: "CategoriaDetail",
   data: () => ({
-    cabecalho: [
-      { text: "Nome", align: "Start", value: "name" },
-      { text: "Icone", align: "Start", value: "titleIcon" },
-      { text: "", align: "center", value: "acoes" },
-    ],
-    detail: [],
+    details: [],
+    categorys: [],
+
     detailTemp: {},
     categoryDetailTemp: null,
 
+    loading: true,
     newModal: false,
     dialogDeletarDetailCategory: false,
+    dialogDeleteError: false,
     editarCategoryDetailModal: false,
+    deleteModalError: false,
   }),
 
-  props: {
-    categoryDetails: {
-      Type: [Array],
-    },
-
-    category: {
-      Type: Object,
-    },
-  },
-
   methods: {
-    fecharModal() {
+    async fecharModal() {
       this.newModal = false;
-      this.$emit("atualizar-category-detail", { id: this.category.id });
+      this.getCategoryDetail();
     },
 
     fecharModalEdit() {
       this.editarCategoryDetailModal = false;
-      this.$emit("atualizar-category-detail", { id: this.category.id });
+      this.getCategoryDetail();
+    },
+
+    async getCategoryDetail() {
+      this.loading = true;
+      await axios
+        .get(
+          `http://localhost:5000/api/CategoryDetail/?categoryID=${this.$route.params.id}`
+        )
+        .then((response) => {
+          this.details = response.data;
+          this.loading = false;
+        });
+    },
+
+    async getCategorys() {
+      await axios
+        .get(`http://localhost:5000/api/category`)
+        .then((response) => (this.categorys = response.data));
     },
 
     async confirmarDeleteCategoryDetail(categoryDetail) {
@@ -122,11 +143,18 @@ export default {
     },
 
     async deleteCategoryDetail() {
-      await axios.delete(
-        `http://localhost:5000/api/CategoryDetail/${this.detailTemp.id}`
-      );
-      this.$emit("deletar-category-detail", { id: this.detailTemp.categoryID });
-      this.dialogDeletarDetailCategory = !this.dialogDeletarDetailCategory;
+      await axios
+        .delete(
+          `http://localhost:5000/api/CategoryDetail/${this.detailTemp.id}`
+        )
+        .then(() => {
+          this.dialogDeletarDetailCategory = false;
+          this.getCategoryDetail();
+        })
+        .catch(() => {
+          this.dialogDeletarDetailCategory = false;
+          this.dialogDeleteError = true;
+        });
     },
 
     async putCategoryDetail(categoryDetail) {
@@ -136,19 +164,23 @@ export default {
   },
 
   computed: {
-    detailName() {
-      return this.category.name ?? ""
-    }
+    category() {
+      return this.categorys.filter(
+        (category) => category.id === +this.$route.params.id
+      )[0]?.name;
+    },
   },
 
-  watch: {
-    categoryDetails() {
-      this.detail = this.categoryDetails;
-    },
+  async created() {
+    await this.getCategoryDetail();
+    await this.getCategorys();
   },
 
   components: {
     FormularioDetail,
+    Loading,
+    DeleteModal,
+    DeleteModalError,
   },
 };
 </script>

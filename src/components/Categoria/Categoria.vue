@@ -21,40 +21,60 @@
           </v-row>
         </v-col>
       </v-card-text>
-      <v-expansion-panels>
-        <v-expansion-panel
+      <v-list>
+        <v-list-group
           v-for="(categoria, index) in filterActive
             ? filterCategorias
             : categorias"
           :key="index"
         >
-          <v-expansion-panel-header>{{
-            categoria.name
-          }}</v-expansion-panel-header>
-          <v-expansion-panel-content>
-            <v-col cols="12">
-              <v-col cols="6"
-                >Imagem Desktop: {{ categoria.desktopSpotlightImage }}
-              </v-col>
-              <v-col cols="6"
-                >Imagem Mobile: {{ categoria.mobileSpotlightImage }}</v-col
-              >
-            </v-col>
-            <v-row justify="start" justify-md="center">
-              <v-btn x-small text class="mr-2" @click="putCategoria(categoria)">
-                <v-icon>mdi-pencil</v-icon> Editar
-              </v-btn>
-              <v-btn x-small text class="mr-2"
-                @click="loadCategoriaDetail(categoria)"
-                ><v-icon>mdi-arrow-down-bold-circle</v-icon> Detalhes
-              </v-btn>
-              <v-btn x-small text @click="confirmarDeletarCategoria(categoria)"
-                ><v-icon>mdi-delete</v-icon> Deletar</v-btn
-              >
-            </v-row>
-          </v-expansion-panel-content>
-        </v-expansion-panel>
-      </v-expansion-panels>
+          <template v-slot:activator>
+            <v-list-item-content class="my-1">
+              <v-list-item-title>{{ categoria.name }}</v-list-item-title>
+            </v-list-item-content>
+          </template>
+
+          <v-card raised class="mt-2 ml-3">
+            <v-list-item>
+              <v-list-item-content>
+                <v-col cols="12">
+                  <v-col cols="12" md="6"
+                    >Imagem Desktop: {{ categoria.desktopSpotlightImage }}
+                  </v-col>
+                  <v-col cols="12" md="6"
+                    >Imagem Mobile: {{ categoria.mobileSpotlightImage }}</v-col
+                  >
+                </v-col>
+                <v-col cols="12">
+                  <v-row justify="start" justify-md="center">
+                    <v-btn
+                      x-small
+                      text
+                      class="mr-2"
+                      @click="putCategoria(categoria)"
+                    >
+                      <v-icon>mdi-pencil</v-icon> Editar
+                    </v-btn>
+                    <v-btn
+                      x-small
+                      text
+                      class="mr-2"
+                      :to="{ path: `/categoriaDetalhes/${categoria.id}` }"
+                      ><v-icon>mdi-arrow-down-bold-circle</v-icon> Detalhes
+                    </v-btn>
+                    <v-btn
+                      x-small
+                      text
+                      @click="confirmarDeletarCategoria(categoria)"
+                      ><v-icon>mdi-delete</v-icon> Deletar</v-btn
+                    >
+                  </v-row>
+                </v-col>
+              </v-list-item-content>
+            </v-list-item>
+          </v-card>
+        </v-list-group>
+      </v-list>
     </v-card>
     <!-- START POST CATEGORY -->
     <v-dialog v-model="dialog" max-width="800px">
@@ -70,48 +90,40 @@
     <v-dialog v-model="editarModal" max-width="800px">
       <Formulario
         :editarCategoria="editarCategoriaTemp"
-        @fechar-formulario="editarModal = false; getCategorias()"
+        @fechar-formulario="
+          editarModal = false;
+          getCategorias();
+        "
         v-if="editarModal"
       />
     </v-dialog>
     <!-- END PUT CATEGORY -->
-    <!-- START DELETE DIALOG -->
+
     <v-dialog v-model="dialogDeletarCategoria" max-width="800px">
-      <v-card>
-        <v-card-title>Deletar Categoria</v-card-title>
-        <v-card-text
-          >Não sera possivel recuperar os dados ja cadastrados apos deletar essa
-          categoria</v-card-text
-        >
-        <v-card-actions>
-          <v-row justify="end" justify-md="start">
-            <v-btn
-              text
-              color="blue"
-              @click="dialogDeletarCategoria = !dialogDeletarCategoria"
-              >Cancelar</v-btn
-            >
-            <v-btn text color="red" @click="deletarCategoria()">Deletar</v-btn>
-          </v-row>
-        </v-card-actions>
-      </v-card>
+      <DeleteModal
+        categoria="Detalhe"
+        @close-modal="dialogDeletarCategoria = false"
+        @action="deletarCategoria()"
+      />
     </v-dialog>
-    <!-- END DELETE DIALOG -->
+
+    <v-dialog v-model="dialogDeleteError">
+      <DeleteModalError
+        categoria="a Categoria"
+        @close-modal="dialogDeleteError = false"
+      />
+    </v-dialog>
+
     <Loading v-if="loading" />
-    <CategoriaDetail
-      :categoryDetails="categoryDetail"
-      :category="categoryTemp"
-      @atualizar-category-detail="loadCategoriaDetail($event)"
-      @deletar-category-detail="loadCategoriaDetail($event)"
-    />
   </v-container>
 </template>
 
 <script>
 import axios from "axios";
 import Formulario from "./Formulario";
-import CategoriaDetail from "./CategoriaDetail/CategoriaDetail";
 import Loading from "@/components/Common/Loading";
+import DeleteModal from "@/components/Common/DeleteModal";
+import DeleteModalError from "@/components/Common/DeleteModalError";
 
 export default {
   name: "Categoria",
@@ -120,6 +132,7 @@ export default {
     loading: false,
     dialog: false,
     dialogDeletarCategoria: false,
+    dialogDeleteError: false,
     desativarBtn: true,
     editarModal: false,
     filter: null,
@@ -136,7 +149,7 @@ export default {
 
   methods: {
     confirmarDeletarCategoria(item) {
-      this.dialogDeletarCategoria = !this.dialogDeletarCategoria;
+      this.dialogDeletarCategoria = true;
       this.deletarCategoriaTemp = item;
     },
 
@@ -152,15 +165,17 @@ export default {
         .delete(
           `http://localhost:5000/api/Category/${this.deletarCategoriaTemp.id}`
         )
-        .catch(() => alert("Existem detalhes sobre essa categoria."));
-      // TODO: CREATE A MODAL FOR SHOW THE ERROR.
-      this.deletarCategoriaTemp = null;
-      this.dialogDeletarCategoria = !this.dialogDeletarCategoria;
-      this.loading = !this.loading;
+        .then(() => (this.dialogDeletarCategoria = false))
+        .catch(() => {
+          this.dialogDeletarCategoria = false;
+          this.dialogDeleteError = true;
+        });
+
       this.getCategorias();
     },
 
     async getCategorias() {
+      this.loading = true;
       await axios.get(`http://localhost:5000/api/Category`).then((response) => {
         this.categorias = response.data;
         this.loading = false;
@@ -194,8 +209,9 @@ export default {
 
   components: {
     Formulario,
-    CategoriaDetail,
     Loading,
+    DeleteModal,
+    DeleteModalError,
   },
 };
 </script>

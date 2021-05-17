@@ -102,27 +102,54 @@
             </v-col>
           </v-row>
         </v-col>
-        <!-- <v-col cols="12">
-        <v-btn block style="pointer-events: none;">Categoria</v-btn> 
-      </v-col>
-      <v-col cols="12">
-        <v-expansion-panels>
-          <v-expansion-panel v-for="(category, index) in categorys" :key="index">
-            <v-expansion-panel-header>{{ category.name }}</v-expansion-panel-header>
-            <div v-if="category.detail">
-            <v-expansion-panel-content v-for="(detail, index) in category.detail" :key="index"><v-checkbox :label="detail.name" :value="detail.id"></v-checkbox></v-expansion-panel-content>
+        <v-col cols="12">
+          <v-btn block style="pointer-events: none">Categoria</v-btn>
+        </v-col>
 
-            </div>
-          </v-expansion-panel>
-        </v-expansion-panels>
-      </v-col> -->
+        <v-col cols="12">
+          <v-card-text>
+            <label>Detalhes Selecionados:</label>
+          </v-card-text>
+          <v-chip-group column >
+            <v-chip  v-for="(chip, index) in chipDetail" :key="index"
+            @click="removeDetailChip(index)"
+            >{{ chip.detail.name }}</v-chip>
+          </v-chip-group>
+        </v-col>
+
+        <v-col cols="12">
+          <v-expansion-panels flat>
+            <v-expansion-panel
+              v-for="(category, index) in categorys"
+              :key="index"
+            >
+              <v-expansion-panel-header>{{
+                category.name
+              }}</v-expansion-panel-header>
+              <div v-if="category.detail">
+                <v-expansion-panel-content
+                  v-for="(detail, index) in category.detail"
+                  :key="index"
+                  ><v-checkbox
+                    v-model="selectedDetail"
+                    :label="detail.name"
+                    :value="{'detail': { 'id': detail.id,  'name': detail.name } }"
+                  ></v-checkbox
+                ></v-expansion-panel-content>
+              </div>
+            </v-expansion-panel>
+          </v-expansion-panels>
+        </v-col>
 
         <v-card-actions class="mt-5">
           <v-row justify="end">
             <v-btn x-small text @click="closeModal()"
               ><v-icon>mdi-close</v-icon>Cancelar</v-btn
             >
-            <v-btn x-small text @click="validateForm()"
+            <v-btn x-small text @click="validateForm()" v-if="editProduct"
+              ><v-icon>mdi-check</v-icon>Editar</v-btn
+            >
+            <v-btn x-small text @click="validateForm()" v-else
               ><v-icon>mdi-check</v-icon>Salvar</v-btn
             >
           </v-row>
@@ -139,6 +166,7 @@ export default {
   name: "ProdutosFormulario",
   data: () => ({
     produto: {
+      brand: "",
       brandID: "",
       code: "",
       name: "",
@@ -163,15 +191,24 @@ export default {
 
     descriptionRules: [(desc) => !!desc || "Insira a descrição do produto"],
 
+    removeChip: [], 
     imagePreview: null,
     imagePreviewDetails: {},
 
     categorys: [{ detail: "" }],
     categorysDetail: [],
+    selectedDetail: [],
+    chipDetail: [],
     filtredDetail: [],
     brands: [],
     brandsNames: [],
   }),
+
+  props: {
+    editProduct: {
+      Type: Object,
+    },
+  },
 
   methods: {
     cleanForm() {
@@ -185,6 +222,16 @@ export default {
         imageID: "",
         productCategoryDetails: [],
       };
+    },
+
+    removeDetailChip(chipIndex) {
+      this.selectedDetail = [ ...this.selectedDetail.filter((detail, index) => index != chipIndex ) ]
+    },
+
+    insertDetailIntoProduct() {
+      this.selectedDetail.map((detail) => {
+        this.produto.productCategoryDetails = [...this.produto.productCategoryDetails, { "categoryDetailID":  detail.detail.id } ]
+      })
     },
 
     closeModal() {
@@ -202,17 +249,24 @@ export default {
       this.imagePreview = null;
     },
 
-    validateForm() {
+    async validateForm() {
       // this.filtredDetail = this.categorysDetail.filter(
       //   (cat) => cat.categoryID === category.id
       // );
-     if(this.$refs.form.validate()) {
-        this.postProduct();
-        this.closeModal()
-     }
-    },
+      
+     
+        this.insertDetailIntoProduct()
+      
+      // if (this.$refs.form.validate()) {
+      //   if (this.editProduct) {
+      //     await this.putProduct();
+      //   } else {
+      //     await this.postProduct();
+      //   }
 
-  
+      //   this.closeModal();
+      // }
+    },
 
     async getBrands() {
       await axios
@@ -235,7 +289,6 @@ export default {
             (response) => (this.categorys[index]["detail"] = [...response.data])
           );
         this.$forceUpdate();
-        console.log(this.categorys[index]["detail"]);
       });
     },
 
@@ -247,10 +300,22 @@ export default {
         externalName: this.produto.externalName,
         description: this.produto.description,
         price: +this.produto.price,
-        imageID: this.imagePreviewDetails.imageID
+        imageID: this.imagePreviewDetails.imageID,
+        productCategoryDetails: this.produto.productCategoryDetails
       });
+    },
 
-      console.log("post")
+    async putProduct() {
+      await axios.put(`http://localhost:5000/api/Product/${this.produto.id}`, {
+        brandID: +this.produto.brandID,
+        code: +this.produto.code,
+        name: this.produto.name,
+        externalName: this.produto.externalName,
+        description: this.produto.description,
+        price: +this.produto.price,
+        imageID: this.imagePreviewDetails.imageID,
+        productCategoryDetails: this.produto.productCategoryDetails
+      });
     },
   },
 
@@ -260,11 +325,29 @@ export default {
         (brand) => brand.name === this.produto.brand
       )[0]?.id;
     },
+     selectedDetail() {
+        this.chipDetail = [ ...this.selectedDetail ]
+      }
   },
 
-  created() {
-    this.getCategorys();
-    this.getBrands();
+  async mounted() {
+    await this.getCategorys();
+    await this.getBrands();
+    this.produto = this.editProduct ?? {
+      brand: "",
+      brandID: "",
+      code: "",
+      name: "",
+      externalName: "",
+      description: "",
+      price: "",
+      imageID: "",
+      productCategoryDetails: [],
+    };
+
+    this.produto.brand = this.brands.filter(
+      (brand) => brand.id === this.produto.brandID
+    )[0]?.name;
   },
 };
 </script>
