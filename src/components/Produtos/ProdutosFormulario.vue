@@ -102,6 +102,7 @@
             </v-col>
           </v-row>
         </v-col>
+
         <v-col cols="12">
           <v-btn block style="pointer-events: none">Categoria</v-btn>
         </v-col>
@@ -110,10 +111,13 @@
           <v-card-text>
             <label>Detalhes Selecionados:</label>
           </v-card-text>
-          <v-chip-group column >
-            <v-chip  v-for="(chip, index) in chipDetail" :key="index"
-            @click="removeDetailChip(index)"
-            >{{ chip.detail.name }}</v-chip>
+          <v-chip-group column>
+            <v-chip
+              v-for="(chip, index) in chipDetail"
+              :key="index"
+              @click="removeDetailChip(index)"
+              >{{ chip.detail.name }}</v-chip
+            >
           </v-chip-group>
         </v-col>
 
@@ -133,7 +137,7 @@
                   ><v-checkbox
                     v-model="selectedDetail"
                     :label="detail.name"
-                    :value="{'detail': { 'id': detail.id,  'name': detail.name } }"
+                    :value="{ detail: { id: detail.id, name: detail.name } }"
                   ></v-checkbox
                 ></v-expansion-panel-content>
               </div>
@@ -191,7 +195,7 @@ export default {
 
     descriptionRules: [(desc) => !!desc || "Insira a descrição do produto"],
 
-    removeChip: [], 
+    removeChip: [],
     imagePreview: null,
     imagePreviewDetails: {},
 
@@ -225,18 +229,51 @@ export default {
     },
 
     removeDetailChip(chipIndex) {
-      this.selectedDetail = [ ...this.selectedDetail.filter((detail, index) => index != chipIndex ) ]
+      this.selectedDetail = [
+        ...this.selectedDetail.filter((detail, index) => index != chipIndex),
+      ];
     },
 
     insertDetailIntoProduct() {
       this.selectedDetail.map((detail) => {
-        this.produto.productCategoryDetails = [...this.produto.productCategoryDetails, { "categoryDetailID":  detail.detail.id } ]
-      })
+        this.produto.productCategoryDetails = [
+          ...this.produto.productCategoryDetails,
+          { categoryDetailID: detail.detail.id },
+        ];
+      });
+    },
+
+    updateDetailIntoProduct() {
+      (this.produto.productCategoryDetails = []),
+        this.selectedDetail.map((detail) => {
+          this.produto.productCategoryDetails = [
+            ...this.produto.productCategoryDetails,
+            { categoryDetailID: detail.detail.id },
+          ];
+        });
+    },
+
+    async editInsertDetailIntoChip() {
+      await this.$forceUpdate();
+      this.produto.productCategoryDetails.forEach(async (category) => {
+        this.categorys.map(async (cat) => {
+          let detailName = cat.detail?.filter(
+            (filtred) => filtred.id === category.categoryDetailID
+          )[0]?.name;
+          console.log(cat.detail);
+          if (detailName) {
+            category = { id: category.categoryDetailID, name: detailName };
+            this.selectedDetail = [
+              ...this.selectedDetail,
+              { detail: { ...category } },
+            ];
+          }
+        });
+      });
     },
 
     closeModal() {
       this.$emit("close-modal");
-      this.cleanForm();
     },
 
     previewImage(file) {
@@ -250,22 +287,17 @@ export default {
     },
 
     async validateForm() {
-      // this.filtredDetail = this.categorysDetail.filter(
-      //   (cat) => cat.categoryID === category.id
-      // );
-      
-     
-        this.insertDetailIntoProduct()
-      
-      // if (this.$refs.form.validate()) {
-      //   if (this.editProduct) {
-      //     await this.putProduct();
-      //   } else {
-      //     await this.postProduct();
-      //   }
+      if (this.$refs.form.validate()) {
+        if (this.editProduct) {
+          this.updateDetailIntoProduct();
+          await this.putProduct();
+        } else {
+          this.insertDetailIntoProduct();
+          await this.postProduct();
+        }
 
-      //   this.closeModal();
-      // }
+        this.closeModal();
+      }
     },
 
     async getBrands() {
@@ -280,17 +312,25 @@ export default {
     async getCategorys() {
       await axios
         .get(`http://localhost:5000/api/category`)
-        .then((response) => (this.categorys = response.data));
-
-      this.categorys.forEach(async (cat, index) => {
-        await axios
-          .get(`http://localhost:5000/api/CategoryDetail/?categoryID=${cat.id}`)
-          .then(
-            (response) => (this.categorys[index]["detail"] = [...response.data])
-          );
-        this.$forceUpdate();
-      });
+        .then((response) => (this.categorys = response.data))
+        .then(() => {
+          // TODO: REFACT THIS SHIT
+          this.categorys.forEach(async (cat, index) => {
+            await axios
+              .get(
+                `http://localhost:5000/api/CategoryDetail/?categoryID=${cat.id}`
+              )
+              .then(
+                (response) =>
+                  (this.categorys[index]["detail"] = [...response.data])
+              );
+           
+          });
+        });
+         this.$forceUpdate();
     },
+
+    async getCategorysDeail() {},
 
     async postProduct() {
       await axios.post(`http://localhost:5000/api/Product`, {
@@ -301,7 +341,7 @@ export default {
         description: this.produto.description,
         price: +this.produto.price,
         imageID: this.imagePreviewDetails.imageID,
-        productCategoryDetails: this.produto.productCategoryDetails
+        productCategoryDetails: this.produto.productCategoryDetails,
       });
     },
 
@@ -314,7 +354,7 @@ export default {
         description: this.produto.description,
         price: +this.produto.price,
         imageID: this.imagePreviewDetails.imageID,
-        productCategoryDetails: this.produto.productCategoryDetails
+        productCategoryDetails: this.produto.productCategoryDetails,
       });
     },
   },
@@ -325,14 +365,15 @@ export default {
         (brand) => brand.name === this.produto.brand
       )[0]?.id;
     },
-     selectedDetail() {
-        this.chipDetail = [ ...this.selectedDetail ]
-      }
+    selectedDetail() {
+      this.chipDetail = [...this.selectedDetail];
+    },
   },
 
   async mounted() {
     await this.getCategorys();
     await this.getBrands();
+
     this.produto = this.editProduct ?? {
       brand: "",
       brandID: "",
@@ -348,6 +389,10 @@ export default {
     this.produto.brand = this.brands.filter(
       (brand) => brand.id === this.produto.brandID
     )[0]?.name;
+
+    if (this.editProduct) {
+      this.editInsertDetailIntoChip();
+    }
   },
 };
 </script>
