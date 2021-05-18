@@ -1,5 +1,5 @@
 <template>
-  <v-card class="mx-auto" max-width="90%">
+  <v-card class="mx-auto" width="100%" max-width="1400px">
     <v-card-title class="mb-3">
       <v-row justify="start" justify-md="start" align="baseline">
         <h4 class="ma-3">Detalhes da Categoria: {{ category }}</h4>
@@ -8,72 +8,37 @@
         >
       </v-row>
     </v-card-title>
-    <!-- TODO: TRANSFORMAR EM COMPONENTS -->
-    <div v-if="isMobile">
-      <v-list>
-        <v-list-group v-for="(detail, index) in details" :key="index">
-          <template v-slot:activator>
-            <v-list-item-content class="my-1">
-              <v-list-item-title>{{ detail.name }}</v-list-item-title>
-            </v-list-item-content>
-          </template>
 
-          <v-card raised class="mt-2 ml-1">
-            <v-list-item>
-              <v-list-item-content>
-                <v-col cols="12">
-                  <p>Icone: {{ detail.titleIcon }}</p>
-                </v-col>
-                <v-col cols="12">
-                  <v-row justify="space-around" justify-md="center">
-                    <v-btn x-small text @click="putCategoryDetail(detail)"
-                      ><v-icon>mdi-pencil</v-icon>Editar</v-btn
-                    >
-                    <v-btn
-                      x-small
-                      text
-                      @click="confirmarDeleteCategoryDetail(detail)"
-                      ><v-icon>mdi-delete</v-icon>Deletar</v-btn
-                    >
-                  </v-row>
-                </v-col>
-              </v-list-item-content>
-            </v-list-item>
-          </v-card>
-        </v-list-group>
-      </v-list>
-    </div>
-    <!-- TODO: TRANSFORMAR EM COMPONENTS -->
-    <div v-else>
-      <v-data-table
-        :headers="headers"
-        :items="details"
-        hide-default-footer
-        no-data-text="Nenhum Detalhe do Produto Encontrado."
-      >
-        <template v-slot:[`item.titleIcon`]="{ item }">
-          <v-img
-            :src="item.titleIcon"
-            height="7rem"
-            width="7rem"
-            alt="Imagem não encontrada"
-          ></v-img>
-        </template>
+    <v-data-table
+      :headers="headers"
+      :items="details"
+      hide-default-footer
+      no-data-text="Nenhum Detalhe do Produto Encontrado."
+      mobile-breakpoint="0"
+    >
+      <template v-slot:[`item.titleIcon`]="{ item }">
+        <v-img
+          :src="item.titleIcon"
+          height="7rem"
+          width="7rem"
+          alt="Imagem não encontrada"
+        ></v-img>
+      </template>
 
-        <template v-slot:[`item.actions`]="{ item }">
-          <v-row justify="center" class="py-1 mt-1">
-            <v-btn text @click="putCategoryDetail(item)"
-              ><v-icon>mdi-pencil</v-icon> Editar</v-btn
-            >
-          </v-row>
-          <v-row justify="center" class="py-1 mb-1">
-            <v-btn text @click="confirmarDeleteCategoryDetail(item)"
-              ><v-icon>mdi-delete</v-icon> Deletar</v-btn
-            >
-          </v-row>
-        </template>
-      </v-data-table>
-    </div>
+      <template v-slot:[`item.actions`]="{ item }">
+        <v-row justify="center" class="py-1 mt-1">
+          <v-btn small text @click="putCategoryDetail(item)"
+            ><v-icon>mdi-pencil</v-icon> Editar</v-btn
+          >
+        </v-row>
+        <v-row justify="center" class="py-1 mb-1">
+          <v-btn small text @click="confirmarDeleteCategoryDetail(item)"
+            ><v-icon>mdi-delete</v-icon> Deletar</v-btn
+          >
+        </v-row>
+      </template>
+    </v-data-table>
+
     <Loading v-if="loading" />
 
     <v-dialog v-model="dialogDeletarDetailCategory" max-width="400px">

@@ -70,7 +70,6 @@
             </v-row>
           </template>
         </v-data-table>
-      <!-- END TODO: -->
     </v-card>
     <!-- START POST CATEGORY -->
     <v-dialog v-model="dialog" max-width="800px">
