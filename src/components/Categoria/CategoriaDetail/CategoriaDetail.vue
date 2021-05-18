@@ -1,4 +1,5 @@
 <template>
+<v-container fluid>
   <v-card class="mx-auto" width="100%" max-width="1400px">
     <v-card-title class="mb-3">
       <v-row justify="start" justify-md="start" align="baseline">
@@ -81,6 +82,7 @@
     </v-dialog>
     <!-- END PUT DETAIL -->
   </v-card>
+  </v-container>
 </template>
 
 <script>

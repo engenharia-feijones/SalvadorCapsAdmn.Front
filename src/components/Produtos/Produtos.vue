@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-card max-width="1400" class="mx-auto">
+    <v-card class="mx-auto" width="100%" max-width="1400px">
       <v-card-title>
         <v-col cols="12">
           <v-row justify="space-around" justify-md="start" align="baseline">
@@ -10,96 +10,14 @@
             >
           </v-row>
         </v-col>
-        <v-col cols="12" v-if="isMobile">
-          <v-row align="baseline">
-            <v-col cols="12" md="2">
-              <v-text-field
-                label="Código"
-                class="input-code-search"
-                type="number"
-                prepend-inner-icon="mdi-magnify"
-                v-model="selectedCode"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="2">
-              <v-text-field
-                label="Nome do Produto"
-                prepend-inner-icon="mdi-magnify"
-                v-model="searchName"
-              ></v-text-field>
-            </v-col>
-
-            <!-- Prodcuct.categoryDetails esta vindo como nulo no momento, então vou deixar esse campo desativado por hora 
-                    <v-col cols="12" md="2">
-                    <v-autocomplete
-                        label="Categoria"
-                        clearable
-                        :items="filterCategory"
-                        no-data-text="Categoria não encontrada."
-                        v-model="selectedFitlerCategory"
-                    ></v-autocomplete>
-                </v-col> -->
-            <v-btn @click="filterSearch()">Pesquisar</v-btn>
-          </v-row>
-        </v-col>
-      </v-card-title>
-      <div v-if="isMobile">
-        <v-list>
-          <v-list-group
-            v-for="(product, index) in filterResults
-              ? filtredProducts
-              : products"
-            :key="index"
-          >
-            <template v-slot:activator>
-              <v-list-item-content class="my-1">
-                <v-list-item-title>{{
-                  `${product.name} R$ ${product.price}`
-                }}</v-list-item-title>
-              </v-list-item-content>
-            </template>
-
-            <v-card raised class="mt-2 ml-3">
-              <v-list-item>
-                <v-list-item-content>
-                  <v-list-item-action>
-                    <v-col cols="12">
-                      <p>Código: {{ product.code }}</p>
-                      <p>Imagem:{{ product.image }}</p>
-                    </v-col>
-                  </v-list-item-action>
-                  <v-list-item-action>
-                    <v-row justify="space-around" justify-md="start">
-                      <v-btn
-                        x-small
-                        text
-                        class="mr-2"
-                        @click="editProduct(product)"
-                      >
-                        <v-icon>mdi-pencil</v-icon> Editar
-                      </v-btn>
-                      <v-btn
-                        x-small
-                        text
-                        class="mr-2"
-                        @click="confirmDeleteProduct(product)"
-                      >
-                        <v-icon>mdi-delete</v-icon> Deletar
-                      </v-btn>
-                    </v-row>
-                  </v-list-item-action>
-                </v-list-item-content>
-              </v-list-item>
-            </v-card>
-          </v-list-group>
-        </v-list>
-      </div>
-      <div v-else>
+        </v-card-title>
+      
         <v-data-table
           :headers="headers"
           :items="products"
           hide-default-footer
-          no-data-text="Nenhum Produto Encontrada."
+          no-data-text="Nenhum Produto Encontrado."
+          mobile-breakpoint="0"
         >
           <template v-slot:[`item.image`]="{ item }">
             <v-img
@@ -123,7 +41,7 @@
             </v-row>
           </template>
         </v-data-table>
-      </div>
+   
     </v-card>
 
     <!-- START POST PRODUCT -->
