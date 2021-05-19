@@ -4,6 +4,20 @@
       <v-card-title>
         <span class="headline">Nova Categoria</span>
       </v-card-title>
+      <v-card-text v-if="editarCategoria">
+        <v-row justify="space-between">
+          <v-img
+            height="5rem"
+            width="5rem"
+            :src="editarCategoria.desktopSpotlightImage"
+          ></v-img>
+          <v-img
+            height="5rem"
+            width="5rem"
+            :src="editarCategoria.mobileSpotlightImage"
+          ></v-img>
+        </v-row>
+      </v-card-text>
       <v-card-text>
         <v-container>
           <v-row>
@@ -37,11 +51,11 @@
                   <v-img
                     width="3rem"
                     height="50px"
-                    :src="categoriasNovas.desktopSpotlightImage"
+                    :src="categoriasNovas.desktopPreviewImage"
                   ></v-img>
                 </v-col>
                 <v-col cols="3">
-                  <p>{{ categoriasNovas.desktopSpotlightImageID }}</p>
+                  <p>{{ categoriasNovas.desktopPreviewName }}</p>
                 </v-col>
                 <!-- <v-col cols="3">
                   <p>{{ categoriasNovas.desktopSize }}</p>
@@ -78,14 +92,11 @@
                   <v-img
                     width="3rem"
                     height="50px"
-                    :src="categoriasNovas.mobileSpotlightImage"
+                    :src="categoriasNovas.mobilePreviewImage"
                   ></v-img>
                 </v-col>
                 <v-col cols="3">
-                  <p>{{ categoriasNovas.mobileSpotlightImageID }}</p>
-                </v-col>
-                <v-col cols="3">
-                  <p>{{ categoriasNovas.mobileSize }}</p>
+                  <p>{{ categoriasNovas.mobilePreviewName }}</p>
                 </v-col>
                 <v-col cols="2">
                   <v-btn x-small @click="removerPreview('Mobile')">X</v-btn>
@@ -151,24 +162,24 @@ export default {
   },
 
   methods: {
-    
-    previewImageDesktop(file) {
+    async previewImageDesktop(file) {
       const reader = new FileReader();
-      this.categoriasNovas.desktopSpotlightImageID = file.name;
 
-      reader.readAsDataURL(file);
+      this.categoriasNovas.desktopPreviewName = file.name;
+
+      await reader.readAsDataURL(file);
       reader.onloadend = () => {
         this.categoriasNovas.desktopBlob = reader.result
           ?.toString()
           .replace("data:", "")
           .replace(/^.+,/, "");
-        this.categoriasNovas.desktopSpotlightImage = `data:image/jpeg;charset=utf-8;base64,${this.categoriasNovas.desktopBlob}`;
+        this.categoriasNovas.desktopPreviewImage = `data:image/jpeg;charset=utf-8;base64,${this.categoriasNovas.desktopBlob}`;
       };
     },
 
     previewImageMobile(file) {
       const reader = new FileReader();
-      this.categoriasNovas.mobileSpotlightImageID = file.name;
+      this.categoriasNovas.mobilePreviewName = file.name;
 
       reader.readAsDataURL(file);
       reader.onloadend = () => {
@@ -176,7 +187,7 @@ export default {
           ?.toString()
           .replace("data:", "")
           .replace(/^.+,/, "");
-        this.categoriasNovas.mobileSpotlightImage = `data:image/jpeg;charset=utf-8;base64,${this.categoriasNovas.mobileBlob}`;
+        this.categoriasNovas.mobilePreviewImage = `data:image/jpeg;charset=utf-8;base64,${this.categoriasNovas.mobileBlob}`;
       };
     },
 
@@ -187,44 +198,84 @@ export default {
     },
 
     async postCategoria() {
-      await axios.post(`http://localhost:5000/api/Category`, {
-        name: this.categoriasNovas.name,
-      }).then(async () => {
-        this.imagePreviewDesktop && await this.postCategoryImage(this.categoriasNovas.desktopSpotlightImageID, this.categoriasNovas.desktopBlob, 1)
-        this.imagePreviewMobile && await this.postCategoryImage(this.categoriasNovas.mobileSpotlightImageID, this.categoriasNovas.mobileBlob, 2)
-      })
+      await axios
+        .post(`http://localhost:5000/api/Category`, {
+          name: this.categoriasNovas.name,
+        })
+        .then(async () => {
+          await this.getLastCategoryId();
+          this.imagePreviewDesktop 
+            await this.postCategoryImage( this.categoriasNovas.desktopPreviewName, this.categoriasNovas.desktopBlob, 1);
+          this.imagePreviewMobile &&
+            (await this.postCategoryImage(
+              this.categoriasNovas.mobilePreviewName,
+              this.categoriasNovas.mobileBlob,
+              2
+            ));
+        });
       this.$emit("cadastro-feito");
       this.fecharModal();
     },
 
     async putCategoria() {
-      await axios.put(
-        `http://localhost:5000/api/Category/${this.categoriasNovas.id}`, {
+      await axios
+        .put(`http://localhost:5000/api/Category/${this.categoriasNovas.id}`, {
           name: this.categoriasNovas.name,
-        }
-      );
+        })
+        .then(async () => {
+          if(this.imagePreviewDesktop) {
+            if (this.categoriasNovas.desktopSpotlightImageID) {
+              await this.putCategoryImage( this.categoriasNovas.id, this.categoriasNovas.desktopSpotlightImageID, this.categoriasNovas.desktopPreviewName, this.categoriasNovas.desktopBlob, 1);
+            } else {
+              this.categoryID = this.categoriasNovas.id
+              await this.postCategoryImage(this.categoriasNovas.desktopPreviewName, this.categoriasNovas.desktopBlob, 1)
+            }
+          }
+          if (this.imagePreviewMobile) {
+            if (this.categoriasNovas.mobileSpotlightImageID) {
+              await this.putCategoryImage( this.categoriasNovas.id, this.categoriasNovas.mobileSpotlightImageID, this.categoriasNovas.mobilePreviewName, this.categoriasNovas.mobileBlob, 2)
+            } else {
+              this.categoryID = this.categoriasNovas.id
+              await this.postCategoryImage( this.categoriasNovas.mobilePreviewName, this.categoriasNovas.mobileBlob, 2)
+            }
+          }
+            
+        });
       this.$emit("cadastro-feito");
       this.fecharModal();
     },
 
     async getLastCategoryId() {
-      await axios.get(`http://localhost:5000/api/Category`)
-        .then((response) => {
-          this.categoryID = response.data[response.data.length - 1].id
-          console.log(this.categoryID)
-        })
+      await axios.get(`http://localhost:5000/api/Category`).then((response) => {
+        this.categoryID = response.data[response.data.length - 1].id;
+      });
     },
 
     async postCategoryImage(name, data, destination) {
-      await this.getLastCategoryId()
+      
       await axios.post(`http://localhost:5000/api/CategoryImage`, {
         categoryID: this.categoryID,
         blobFile: {
           name: name ?? " ",
-          data: data ?? " "
+          data: data ?? " ",
         },
-        destination: destination
-      })
+        destination: destination,
+      });
+    },
+
+    async putCategoryImage(categoryID, id, name, data, destination) {
+      await axios.put(`http://localhost:5000/api/CategoryImage/${id}`, {
+        categoryID: +categoryID,
+        blobFile: {
+          name: name ?? " ",
+          data: data ?? " ",
+        },
+        destination: destination,
+      }).then(this.deleteCategoryImage(id))
+    },
+
+    async deleteCategoryImage(id) {
+      await axios.delete(`http://localhost:5000/api/CategoryImage/${id}`);
     },
 
     fecharModal() {
@@ -253,7 +304,21 @@ export default {
       mobileSpotlight: "",
       mobileSpotlightImageID: "",
       mobileSpotlightImage: "",
+      desktopPreviewName: "",
+      desktopPreviewImage: "",
+      mobilePreviewName: "",
+      mobilePreviewImage: "",
     };
+
+    if (this.editarCategoria) {
+      this.categoriasNovas = {
+        ...this.categoriasNovas,
+        desktopPreviewName: "",
+        desktopPreviewImage: "",
+        mobilePreviewName: "",
+        mobilePreviewImage: "",
+      };
+    }
   },
 };
 </script>
