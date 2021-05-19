@@ -43,9 +43,9 @@
                 <v-col cols="3">
                   <p>{{ categoriasNovas.desktopSpotlightImageID }}</p>
                 </v-col>
-                <v-col cols="3">
+                <!-- <v-col cols="3">
                   <p>{{ categoriasNovas.desktopSize }}</p>
-                </v-col>
+                </v-col> -->
                 <v-col cols="2">
                   <v-btn x-small @click="removerPreview('Desktop')">X</v-btn>
                 </v-col>
@@ -136,20 +136,12 @@ export default {
 
     imagePreviewDesktop: null,
     imagePreviewMobile: null,
+    // TODO: REFACT THESE VARIABLE
     categoriasNovas: {
       nome: "",
-      Desktop: {
-        nome: "",
-        url: "",
-        tamanho: "",
-      },
-
-      Mobile: {
-        nome: "",
-        url: "",
-        tamanho: "",
-      },
     },
+
+    categoryID: 0,
   }),
 
   props: {
@@ -159,21 +151,33 @@ export default {
   },
 
   methods: {
-    previewImageDesktop(payload) {
-      const file = payload;
-      this.categoriasNovas.desktopSpotlightImage = window.URL.createObjectURL(
-        file
-      );
-      this.categoriasNovas.desktopSize = Math.floor(+file.size / 1024) + "Kbs";
+    
+    previewImageDesktop(file) {
+      const reader = new FileReader();
       this.categoriasNovas.desktopSpotlightImageID = file.name;
+
+      reader.readAsDataURL(file);
+      reader.onloadend = () => {
+        this.categoriasNovas.desktopBlob = reader.result
+          ?.toString()
+          .replace("data:", "")
+          .replace(/^.+,/, "");
+        this.categoriasNovas.desktopSpotlightImage = `data:image/jpeg;charset=utf-8;base64,${this.categoriasNovas.desktopBlob}`;
+      };
     },
-    previewImageMobile(payload) {
-      const file = payload;
+
+    previewImageMobile(file) {
+      const reader = new FileReader();
       this.categoriasNovas.mobileSpotlightImageID = file.name;
-      this.categoriasNovas.mobileSpotlightImage = window.URL.createObjectURL(
-        file
-      );
-      this.categoriasNovas.mobileSize = Math.floor(+file.size / 1024) + "Kbs";
+
+      reader.readAsDataURL(file);
+      reader.onloadend = () => {
+        this.categoriasNovas.mobileBlob = reader.result
+          ?.toString()
+          .replace("data:", "")
+          .replace(/^.+,/, "");
+        this.categoriasNovas.mobileSpotlightImage = `data:image/jpeg;charset=utf-8;base64,${this.categoriasNovas.mobileBlob}`;
+      };
     },
 
     removerPreview(imgType) {
@@ -183,32 +187,44 @@ export default {
     },
 
     async postCategoria() {
-      console.log(this.categoriasNovas);
       await axios.post(`http://localhost:5000/api/Category`, {
         name: this.categoriasNovas.name,
-        desktopSpotlight: this.categoriasNovas.desktopSpotlight != "",
-        desktopSpotlightImageID: this.categoriasNovas.desktopSpotlightImageID,
-        desktopSpotlightImage: this.categoriasNovas.desktopSpotlightImage,
-        mobileSpotlight: this.categoriasNovas.mobileSpotlight != "",
-        mobileSpotlightImageID: this.categoriasNovas.mobileSpotlightImageID,
-        mobileSpotlightImage: this.categoriasNovas.mobileSpotlightImage,
-      });
+      }).then(async () => {
+        this.imagePreviewDesktop && await this.postCategoryImage(this.categoriasNovas.desktopSpotlightImageID, this.categoriasNovas.desktopBlob, 1)
+        this.imagePreviewMobile && await this.postCategoryImage(this.categoriasNovas.mobileSpotlightImageID, this.categoriasNovas.mobileBlob, 2)
+      })
       this.$emit("cadastro-feito");
       this.fecharModal();
     },
 
     async putCategoria() {
-      await axios.put(`http://localhost:5000/api/Category/${this.categoriasNovas.id}`, {
-        name: this.categoriasNovas.name,
-        desktopSpotlight: this.categoriasNovas.desktopSpotlight != "",
-        desktopSpotlightImageID: this.categoriasNovas.desktopSpotlightImageID,
-        desktopSpotlightImage: this.categoriasNovas.desktopSpotlightImage,
-        mobileSpotlight: this.categoriasNovas.mobileSpotlight != "",
-        mobileSpotlightImageID: this.categoriasNovas.mobileSpotlightImageID,
-        mobileSpotlightImage: this.categoriasNovas.mobileSpotlightImage,
-      });
-        this.$emit("cadastro-feito");
-        this.fecharModal();
+      await axios.put(
+        `http://localhost:5000/api/Category/${this.categoriasNovas.id}`, {
+          name: this.categoriasNovas.name,
+        }
+      );
+      this.$emit("cadastro-feito");
+      this.fecharModal();
+    },
+
+    async getLastCategoryId() {
+      await axios.get(`http://localhost:5000/api/Category`)
+        .then((response) => {
+          this.categoryID = response.data[response.data.length - 1].id
+          console.log(this.categoryID)
+        })
+    },
+
+    async postCategoryImage(name, data, destination) {
+      await this.getLastCategoryId()
+      await axios.post(`http://localhost:5000/api/CategoryImage`, {
+        categoryID: this.categoryID,
+        blobFile: {
+          name: name ?? " ",
+          data: data ?? " "
+        },
+        destination: destination
+      })
     },
 
     fecharModal() {
@@ -228,7 +244,7 @@ export default {
     },
   },
 
-  created() {
+  async created() {
     this.categoriasNovas = this.editarCategoria ?? {
       name: "",
       desktopSpotlight: "",

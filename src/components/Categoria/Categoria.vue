@@ -25,52 +25,52 @@
         </v-col>
       </v-card-text>
 
-  
-        <v-data-table
-          :headers="headers"
-          :items="categorias"
-          :search="filter"
-          hide-default-footer
-          no-data-text="Nenhuma Categoria Encontrada."
-          mobile-breakpoint="0"
-        >
-          <template v-slot:[`item.desktopSpotlightImage`]="{ item }">
-            <v-img
-              :src="item.desktopSpotlightImage"
-              height="7rem"
-              width="7rem"
-              alt="Imagem não encontrada"
-            ></v-img>
-          </template>
+      <v-data-table
+        :headers="headers"
+        :items="categorias"
+        :search="filter"
+        hide-default-footer
+        no-data-text="Nenhuma Categoria Encontrada."
+        mobile-breakpoint="0"
+      >
+        <template v-slot:[`item.desktopSpotlightImage`]="{ item }">
+          <v-img
+            :src="item.desktopSpotlightImage"
+            height="7rem"
+            width="7rem"
+            alt="Imagem não encontrada"
+          ></v-img>
+        </template>
 
-          <template v-slot:[`item.mobileSpotlightImage`]="{ item }">
-            <v-img
-              :src="item.mobileSpotlightImage"
-              height="7rem"
-              width="7rem"
-              alt="Imagem não encontrada"
-            ></v-img>
-          </template>
+        <template v-slot:[`item.mobileSpotlightImage`]="{ item }">
+          <v-img
+            :src="item.mobileSpotlightImage"
+            height="7rem"
+            width="7rem"
+            alt="Imagem não encontrada"
+          ></v-img>
+        </template>
 
-          <template v-slot:[`item.actions`]="{ item }">
-            <v-row justify="center" class="py-1 mt-1">
-              <v-btn small text @click="putCategoria(item)"
-                ><v-icon>mdi-pencil</v-icon> Editar</v-btn
-              >
-            </v-row>
-            <v-row justify="center" class="py-1">
-              <v-btn small text :to="{ path: `/categoriaDetalhes/${item.id}` }"
-                ><v-icon>mdi-arrow-down</v-icon> Detalhes</v-btn
-              >
-            </v-row>
-            <v-row justify="center" class="py-1 mb-1">
-              <v-btn small text @click="confirmarDeletarCategoria(item)"
-                ><v-icon>mdi-delete</v-icon> Deletar</v-btn
-              >
-            </v-row>
-          </template>
-        </v-data-table>
+        <template v-slot:[`item.actions`]="{ item }">
+          <v-row justify="center" class="py-1 mt-1">
+            <v-btn small text @click="putCategoria(item)"
+              ><v-icon>mdi-pencil</v-icon> Editar</v-btn
+            >
+          </v-row>
+          <v-row justify="center" class="py-1">
+            <v-btn small text :to="{ path: `/categoriaDetalhes/${item.id}` }"
+              ><v-icon>mdi-arrow-down</v-icon> Detalhes</v-btn
+            >
+          </v-row>
+          <v-row justify="center" class="py-1 mb-1">
+            <v-btn small text @click="confirmarDeletarCategoria(item)"
+              ><v-icon>mdi-delete</v-icon> Deletar</v-btn
+            >
+          </v-row>
+        </template>
+      </v-data-table>
     </v-card>
+    
     <!-- START POST CATEGORY -->
     <v-dialog v-model="dialog" max-width="800px">
       <Formulario
@@ -185,6 +185,7 @@ export default {
       await axios.get(`http://localhost:5000/api/Category`).then((response) => {
         this.categorias = response.data;
         this.loading = false;
+        console.log(this.categorias)
       });
       this.categorias.map((categoria) => {
         this.filterData = [...this.filterData, categoria.name];
