@@ -165,7 +165,6 @@ export default {
     },
 
     async putCategoryDetail() {
-      console.log()
       await axios.put(
         `http://localhost:5000/api/CategoryDetail/${this.novaCategoriaDetail.id}`,
         {
@@ -173,11 +172,13 @@ export default {
           name: this.novaCategoriaDetail.name,
         }
       ).then(async () => {
-        if (this.novaCategoriaDetail.titleIconID) {
+        if (this.iconPreview) {
+          if (this.novaCategoriaDetail.titleIconID) {
           await this.putCategoryDetailIcon()
         } else {
           this.categoryDetailID = this.categoryDetail.id
           await this.postCategoryDetailIcon()
+        }
         }
       })
       this.fecharModal();
@@ -187,8 +188,8 @@ export default {
       await axios.put(`http://localhost:5000/api/CategoryDetailImage/${this.novaCategoriaDetail.titleIconID}`, {
         categoryDetailID: +this.categoryDetail.id,
         blobFile: {
-          name: this.icon.name,
-          data: this.icon.blob
+          name: this.icon.name ?? " ",
+          data: this.icon.blob ?? " "
         }
       })
     },

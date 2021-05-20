@@ -121,10 +121,9 @@ export default {
       await this.getCategoryDetail();
     },
 
-    fecharModalEdit() {
+    async fecharModalEdit() {
       this.editarCategoryDetailModal = false;
-      this.getCategoryDetail();
-      this.$forceUpdate()
+      await this.getCategoryDetail();
     },
 
     async getCategoryDetail() {
