@@ -26,6 +26,7 @@
               height="7rem"
               width="7rem"
               alt="Imagem não encontrada"
+              style="display: inline-block"
             ></v-img>
           </template>
 

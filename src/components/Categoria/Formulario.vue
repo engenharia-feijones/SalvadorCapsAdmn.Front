@@ -5,18 +5,20 @@
         <span class="headline">Nova Categoria</span>
       </v-card-title>
       <v-card-text v-if="editarCategoria">
-        <v-row justify="space-between">
-          <v-img
-            height="5rem"
-            width="5rem"
+        <v-col cols="12" align="center">
+          <img
             :src="editarCategoria.desktopSpotlightImage"
-          ></v-img>
-          <v-img
-            height="5rem"
-            width="5rem"
+            alt="#"
+            width="50%"
+          />
+        </v-col>
+        <v-col cols="12" align="center">
+          <img
             :src="editarCategoria.mobileSpotlightImage"
-          ></v-img>
-        </v-row>
+            alt="#"
+            width="50%"
+          />
+        </v-col>
       </v-card-text>
       <v-card-text>
         <v-container>
@@ -290,16 +292,15 @@ export default {
     },
 
     async putCategoryImage(categoryID, id, name, data, destination) {
-      await axios
-        .put(`http://localhost:5000/api/CategoryImage/${id}`, {
-          categoryID: +categoryID,
-          blobFile: {
-            name: name ?? " ",
-            data: data ?? " ",
-          },
-          destination: destination,
-        })
-        // .then(this.deleteCategoryImage(id));
+      await axios.put(`http://localhost:5000/api/CategoryImage/${id}`, {
+        categoryID: +categoryID,
+        blobFile: {
+          name: name ?? " ",
+          data: data ?? " ",
+        },
+        destination: destination,
+      });
+      // .then(this.deleteCategoryImage(id));
     },
 
     async deleteCategoryImage(id) {

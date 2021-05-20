@@ -121,9 +121,13 @@ export default {
       await this.getCategoryDetail();
     },
 
+    gambiarra() {
+      document.location.reload(true);
+    },
+
     async fecharModalEdit() {
       this.editarCategoryDetailModal = false;
-      await this.getCategoryDetail();
+      this.gambiarra()
     },
 
     async getCategoryDetail() {

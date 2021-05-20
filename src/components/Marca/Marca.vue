@@ -10,7 +10,7 @@
         </v-row>
       </v-card-title>
 
-      <v-data-table :headers="cabecalho" :items="brands" sort-by="nome">
+      <v-data-table :headers="cabecalho" :items="brands" sort-by="nome" mobile-breakpoint="0" hide-default-footer>
         <template v-slot:[`item.desktopSpotlightImage`]="{ item }">
           <v-img
             :src="item.desktopSpotlightImage"
@@ -46,8 +46,16 @@
         </template>
       </v-data-table>
 
-      <v-dialog v-model="newModal" max-width="800px">
-        <FormularioMarca />
+      <v-dialog v-model="newModal" v-if="newModal" max-width="800px">
+        <FormularioMarca 
+          @close-modal="closeModal()"
+        />
+      </v-dialog>
+
+      <v-dialog v-model="editModal" v-if="editModal" max-width="800px">
+        <FormularioMarca @close-modal="closeEditModal()"
+          :editBrand="brandTemp"
+         />
       </v-dialog>
 
       <v-dialog v-model="deleteModalShow">
@@ -56,12 +64,17 @@
           @close-modal="deleteModalShow = false"
         />
       </v-dialog>
+
+      <v-dialog v-model="deleteModalErrorShow">
+        <DeleteModalError @close-modal="deleteModalErrorShow = false" />
+      </v-dialog>
     </v-card>
   </v-container>
 </template>
 <script>
 import axios from "axios";
 import DeleteModal from "@/components/Common/DeleteModal";
+import DeleteModalError from "@/components/Common/DeleteModalError";
 import FormularioMarca from './FormularioMarca'
 
 export default {
@@ -69,6 +82,9 @@ export default {
 
   data: () => ({
     newModal: false,
+    editModal: false,
+    deleteModalShow: false,
+    deleteModalErrorShow: false,
     brandID: "",
     img64Mob: "",
     img64Desk: "",
@@ -115,39 +131,27 @@ export default {
     brandToEdit: {},
 
     deleteTemp: {},
-    deleteModalShow: false,
+    
   }),
   created() {
     this.getBrand();
   },
   methods: {
-    previwerImageMob(file) {
-      const reader = new FileReader();
-      this.editedItem.imagemMobile.nome = file.name;
-      reader.readAsDataURL(file);
-      reader.onloadend = () => {
-        this.editedItem.imagemMobile.url = reader.result
-          ?.toString()
-          .replace("data:", "")
-          .replace(/^.+,/, "");
-        this.editedItem.imagemMobile.previwer = `data:image/jpeg;charset=utf-8;base64,${this.editedItem.imagemMobile.url}`;
-      };
-    },
+
     gambiarra() {
-      document.location.reload(true);
+      document.location.reload(true)
     },
-    previwerimage(file) {
-      const reader = new FileReader();
-      this.editedItem.imagemDesktop.nome = file.name;
-      reader.readAsDataURL(file);
-      reader.onloadend = () => {
-        this.editedItem.imagemDesktop.url = reader.result
-          ?.toString()
-          .replace("data:", "")
-          .replace(/^.+,/, "");
-        this.editedItem.imagemDesktop.previwer = `data:image/jpeg;charset=utf-8;base64,${this.editedItem.imagemDesktop.url}`;
-      };
+
+    closeModal() {
+      this.newModal = false
+      this.gambiarra()
     },
+
+    closeEditModal() {
+      this.editModal = false,
+      this.gambiarra()
+    },
+
     async getLastBrandID() {
       await axios.get(`http://localhost:5000/api/Brand`).then((response) => {
         this.brandID = response.data[response.data.length - 1].id;
@@ -155,52 +159,14 @@ export default {
     },
 
     async getOneBrandToEdit(brand) {
-      await axios
-        .get(`http://localhost:5000/api/Brand/${brand.id}`)
-        .then((response) => {
-          this.editedItem.nome = response.data.name;
-          console.log(response.data);
-          this.newModal = true;
-        });
+     this.brandTemp = brand
+     this.editModal = true
     },
 
     async getBrand() {
       await axios.get(`http://localhost:5000/api/Brand`).then((response) => {
         this.brands = response.data;
       });
-    },
-
-    async postBrand() {
-      console.log(this.editedItem.imagemMobile.url);
-      await axios
-        .post(`http://localhost:5000/api/Brand`, {
-          name: this.editedItem.nome,
-        })
-        .then(async () => {
-          await this.getLastBrandID();
-          if (this.editedItem.imagemMobile.url) {
-            await axios.post(`http://localhost:5000/api/BrandImage`, {
-              brandID: this.brandID,
-              blobFile: {
-                name: this.editedItem.imagemMobile.nome,
-                data: this.editedItem.imagemMobile.url,
-              },
-              destination: 2,
-            });
-          }
-          if (this.editedItem.imagemDesktop.url) {
-            await axios.post(`http://localhost:5000/api/BrandImage`, {
-              brandID: this.brandID,
-              blobFile: {
-                name: this.editedItem.imagemDesktop.nome,
-                data: this.editedItem.imagemDesktop.url,
-              },
-              destination: 1,
-            });
-          }
-        });
-
-      document.location.reload(true);
     },
 
     confirmDeleteModal(item) {
@@ -211,13 +177,20 @@ export default {
     async deleteBrand() {
       await axios
         .delete(`http://localhost:5000/api/Brand/${this.deleteTemp.id}`)
-        .then(() => (this.deleteModal = false));
-      document.location.reload(true);
+        .then(() => {
+          this.deleteModal = false
+          document.location.reload(true);
+        }).catch(() => {
+          this.deleteModalShow = false
+          this.deleteModalErrorShow = true
+        })
+      
     },
   },
 
   components: {
     DeleteModal,
+    DeleteModalError,
     FormularioMarca,
   },
 };
