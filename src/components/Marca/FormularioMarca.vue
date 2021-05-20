@@ -1,12 +1,12 @@
 <template>
   <v-form lazy-validation ref="form">
     <v-card>
-      <v-col cols="12"  v-if="editBrand" align="center">
-          <img :src="editBrand.desktopSpotlightImage" alt="#"  width="50%">
+      <v-col cols="12" v-if="editBrand" align="center">
+        <img :src="editBrand.desktopSpotlightImage" alt="#" width="50%" />
       </v-col>
-        <v-col cols="12" align="center" v-if="editBrand">
-          <img :src="editBrand.mobileSpotlightImage" alt="#"  width="50%">
-        </v-col>
+      <v-col cols="12" align="center" v-if="editBrand">
+        <img :src="editBrand.mobileSpotlightImage" alt="#" width="50%" />
+      </v-col>
 
       <v-card-title>
         <span class="headline">Nova Marca</span>
@@ -14,7 +14,7 @@
       <v-card-text>
         <v-container>
           <v-row justify="center" align="center">
-            <v-col class="mb-0 pb-0" cols="12"  md="12">
+            <v-col class="mb-0 pb-0" cols="12" md="12">
               <v-text-field
                 outlined
                 v-model="brand.name"
@@ -33,46 +33,44 @@
           </v-row>
 
           <v-col cols="12" md="12" lg="12">
-            <v-card >
-              <v-btn small fab class="mb-2 mt-2 ml-2 txtBtn">
-                <v-file-input
-                  accept="image/png, image/jpeg, image/bmp"
-                  @change="readBase64Desktop"
-                  v-model="fileDesktop"
-                  class="ml-2 mb-2"
-                  prepend-icon="mdi-remote-desktop"
-                  filled
-                  hide-input
-                >
-                </v-file-input>
-              </v-btn>
-              <label class="ml-4">Imagem Desktop</label>
-              <v-card>
-                <v-row
-                  v-if="fileDesktop"
-                  justify="center"
-                  align="center"
-                  align-md="baseline"
-                  class="mt-3 elevation-0"
-                >
-                  <v-col cols="3">
-                    <v-img
-                      width="3rem"
-                      height="50px"
-                      :src="base64Desktop.preview"
-                    ></v-img>
-                  </v-col>
-                  <v-col cols="3">
-                    <p>{{ base64Desktop.name }}</p>
-                  </v-col>
-                  <v-col cols="2">
-                    <v-btn x-small @click="removerPreview('Desktop')">X</v-btn>
-                  </v-col>
-                </v-row>
-              </v-card>
+            <v-btn small fab class="my-2 ml-1 txtBtn">
+              <v-file-input
+                accept="image/png, image/jpeg, image/bmp"
+                @change="readBase64Desktop"
+                v-model="fileDesktop"
+                class="ml-2 mb-2"
+                prepend-icon="mdi-remote-desktop"
+                filled
+                hide-input
+              >
+              </v-file-input>
+            </v-btn>
+            <label class="ml-4">Imagem Desktop</label>
+            <v-card>
+              <v-row
+                v-if="fileDesktop"
+                justify="center"
+                align="center"
+                align-md="baseline"
+                class="mt-3 elevation-0"
+              >
+                <v-col cols="3">
+                  <v-img
+                    width="3rem"
+                    height="50px"
+                    :src="base64Desktop.preview"
+                  ></v-img>
+                </v-col>
+                <v-col cols="3">
+                  <p>{{ base64Desktop.name }}</p>
+                </v-col>
+                <v-col cols="2">
+                  <v-btn x-small @click="removerPreview('Desktop')">X</v-btn>
+                </v-col>
+              </v-row>
             </v-card>
           </v-col>
-          <v-col cols="12" sm="6" md="12" lg="12" class="elevation-2">
+          <v-col cols="12" sm="6" md="12" lg="12">
             <v-btn small fab class="txtBtn">
               <v-file-input
                 @change="readBase64Mobile"
@@ -195,12 +193,20 @@ export default {
       this.$emit("close-modal");
     },
 
+    removerPreview(type) {
+      if (type === "Desktop") {
+        this.fileDesktop = null;
+      } else {
+        this.fileMobile = null;
+      }
+    },
+
     async validateForm() {
       if (this.$refs.form.validate()) {
         if (this.editBrand) {
           await this.putBrand();
         } else {
-          await this.postBrand()
+          await this.postBrand();
         }
       }
     },
@@ -211,7 +217,7 @@ export default {
           name: this.brand.name,
         })
         .then(async () => {
-          await this.getLastBrandID()
+          await this.getLastBrandID();
           if (this.fileMobile) {
             await this.postBrandImage(
               this.base64Mobile.name,
@@ -266,7 +272,11 @@ export default {
               );
             } else {
               this.lastBrandID = this.brand.id;
-              await this.postBrandImage(this.base64Mobile.name, this.base64Mobile.data, 2);
+              await this.postBrandImage(
+                this.base64Mobile.name,
+                this.base64Mobile.data,
+                2
+              );
             }
           }
         });

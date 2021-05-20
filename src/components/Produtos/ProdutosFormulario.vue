@@ -147,13 +147,13 @@
 
         <v-card-actions class="mt-5">
           <v-row justify="end">
-            <v-btn x-small text @click="closeModal()"
+            <v-btn  text  color="blue" @click="closeModal()"
               ><v-icon>mdi-close</v-icon>Cancelar</v-btn
             >
-            <v-btn x-small text @click="validateForm()" v-if="editProduct"
+            <v-btn  color="blue" text @click="validateForm()" v-if="editProduct"
               ><v-icon>mdi-check</v-icon>Editar</v-btn
             >
-            <v-btn x-small text @click="validateForm()" v-else
+            <v-btn color="blue" text @click="validateForm()" v-else
               ><v-icon>mdi-check</v-icon>Salvar</v-btn
             >
           </v-row>
