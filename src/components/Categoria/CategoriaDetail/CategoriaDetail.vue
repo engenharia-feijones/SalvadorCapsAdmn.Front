@@ -17,12 +17,13 @@
       no-data-text="Nenhum Detalhe do Produto Encontrado."
       mobile-breakpoint="0"
     >
-      <template v-slot:[`item.titleIcon`]="{ item }">
-        <v-img
+      <template v-slot:[`item.titleIcon`]="{ item }" >
+          <v-img
           :src="item.titleIcon"
           height="7rem"
           width="7rem"
           alt="Imagem não encontrada"
+          style="display: inline-block"
         ></v-img>
       </template>
 
@@ -95,11 +96,11 @@ import DeleteModalError from "@/components/Common/DeleteModalError";
 export default {
   name: "CategoriaDetail",
   data: () => ({
-    details: [],
+    details: [{titleIcon: ""}],
     categorys: [],
     headers: [
       { text: "Detalhe", align: "center", value: "name" },
-      { text: "Icone", align: "center", value: "" },
+      { text: "Icone", align: "center", value: "titleIcon" },
       { text: "Ações", align: "center", value: "actions" },
     ],
 
@@ -117,12 +118,13 @@ export default {
   methods: {
     async fecharModal() {
       this.newModal = false;
-      this.getCategoryDetail();
+      await this.getCategoryDetail();
     },
 
     fecharModalEdit() {
       this.editarCategoryDetailModal = false;
       this.getCategoryDetail();
+      this.$forceUpdate()
     },
 
     async getCategoryDetail() {
@@ -133,6 +135,7 @@ export default {
         )
         .then((response) => {
           this.details = response.data;
+          console.log(this.details)
           this.loading = false;
         });
     },
@@ -174,15 +177,6 @@ export default {
       return this.categorys.filter(
         (category) => category.id === +this.$route.params.id
       )[0]?.name;
-    },
-
-    isMobile() {
-      switch (this.$vuetify.breakpoint.name) {
-        case "xs":
-          return true;
-        default:
-          return false;
-      }
     },
   },
 

@@ -7,6 +7,7 @@
       <v-card-text>
         <v-container>
           <v-row>
+            <v-img :src="categoryDetail.titleIcon" v-if="categoryDetail"></v-img>
             <v-col cols="12" sm="4" md="12">
               <v-text-field
                 v-model="novaCategoriaDetail.name"
@@ -39,14 +40,11 @@
                   <v-img
                     width="3rem"
                     height="50px"
-                    :src="novaCategoriaDetail.titleIcon"
+                    :src="icon.preview"
                   ></v-img>
                 </v-col>
                 <v-col cols="3">
-                  <p>{{ novaCategoriaDetail.titleIconID }}</p>
-                </v-col>
-                <v-col cols="3">
-                  <p>{{ novaCategoriaDetail.size }}</p>
+                  <p>{{ icon.name }}</p>
                 </v-col>
                 <v-col cols="2">
                   <v-btn x-small @click="removerPreview()">X</v-btn>
@@ -99,9 +97,16 @@ export default {
       titleIconID: "",
       titleIcon: "",
     },
+    icon: {
+      name: "",
+      blob: "",
+      preview: "",
+    },
+
+    categoryDetailID: 0,
 
     desativarBtn: true,
-
+    
     iconPreview: null,
   }),
 
@@ -118,20 +123,17 @@ export default {
 
   methods: {
     previewIcon(file) {
-      this.novaCategoriaDetail.titleIconID = file.name;
-      this.novaCategoriaDetail.titleIcon = window.URL.createObjectURL(file);
-      this.novaCategoriaDetail.size = Math.floor(+file.size / 1024) + "KBs";
+      const reader = new FileReader()
+
+      this.icon.name = file.name
+      reader.readAsDataURL(file)
+      reader.onloadend = () => {
+        this.icon.blob = reader.result?.toString().replace("data:", "").replace(/^.+,/, "");
+        this.icon.preview = `data:image/jpeg;charset=utf-8;base64,${this.icon.blob}`;
+      }
     },
 
     removerPreview() {
-      this.iconPreview = null;
-    },
-
-    limparModal() {
-      this.novaCategoriaDetail.name = "";
-      this.novaCategoriaDetail.titleIconID = "";
-      this.novaCategoriaDetail.titleIcon = "";
-      this.novaCategoriaDetail.size = null;
       this.iconPreview = null;
     },
 
@@ -143,25 +145,58 @@ export default {
       await axios.post(`http://localhost:5000/api/CategoryDetail`, {
         categoryID: this.categoryID,
         name: this.novaCategoriaDetail.name,
-        titleIconID: this.novaCategoriaDetail.titleIconID,
-        titleIcon: this.novaCategoriaDetail.titleIcon,
-      });
-      // TODO: no futuro lembrar de por os atributos produtos aqui
+      }).then(async () => {
+       if (this.iconPreview) {
+          await this.getLastCategoryDetailID()
+          await this.postCategoryDetailIcon()
+       }
+      })
       this.fecharModal();
     },
 
+    async postCategoryDetailIcon() {
+      await axios.post(`http://localhost:5000/api/CategoryDetailImage`, {
+        categoryDetailID: this.categoryDetailID, 
+        blobFile: {
+          name: this.icon.name,
+          data: this.icon.blob
+        }
+      })
+    },
+
     async putCategoryDetail() {
+      console.log()
       await axios.put(
         `http://localhost:5000/api/CategoryDetail/${this.novaCategoriaDetail.id}`,
         {
           categoryID: this.categoryID,
           name: this.novaCategoriaDetail.name,
-          titleIconID: this.novaCategoriaDetail.titleIconID,
-          titleIcon: this.novaCategoriaDetail.titleIcon,
         }
-      );
+      ).then(async () => {
+        if (this.novaCategoriaDetail.titleIconID) {
+          await this.putCategoryDetailIcon()
+        } else {
+          this.categoryDetailID = this.categoryDetail.id
+          await this.postCategoryDetailIcon()
+        }
+      })
       this.fecharModal();
     },
+
+    async putCategoryDetailIcon() {
+      await axios.put(`http://localhost:5000/api/CategoryDetailImage/${this.novaCategoriaDetail.titleIconID}`, {
+        categoryDetailID: +this.categoryDetail.id,
+        blobFile: {
+          name: this.icon.name,
+          data: this.icon.blob
+        }
+      })
+    },
+
+    async getLastCategoryDetailID() {
+      await axios.get(`http://localhost:5000/api/CategoryDetail`)
+      .then((response) => this.categoryDetailID = response.data[response.data.length - 1]?.id)
+    }
   },
 
   watch: {
@@ -172,12 +207,14 @@ export default {
     },
   },
 
-  created() {
+  async created() {
     this.novaCategoriaDetail = { ...this.categoryDetail } ?? {
       name: null,
       titleIconID: "",
       titleIcon: "",
     };
+
+    await this.getLastCategoryDetailID()
   },
 };
 </script>

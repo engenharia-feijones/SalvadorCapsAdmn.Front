@@ -231,6 +231,7 @@ export default {
               await this.postCategoryImage(this.categoriasNovas.desktopPreviewName, this.categoriasNovas.desktopBlob, 1)
             }
           }
+          
           if (this.imagePreviewMobile) {
             if (this.categoriasNovas.mobileSpotlightImageID) {
               await this.putCategoryImage( this.categoriasNovas.id, this.categoriasNovas.mobileSpotlightImageID, this.categoriasNovas.mobilePreviewName, this.categoriasNovas.mobileBlob, 2)
