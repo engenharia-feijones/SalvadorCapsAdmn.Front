@@ -1,236 +1,74 @@
 <template>
-  <v-data-table :headers="cabecalho" :items="brands" sort-by="nome">
-    <template v-slot:[`item.desktopSpotlightImage`]="{ item }">
-      <v-img
-        :src="item.desktopSpotlightImage"
-        height="7rem"
-        width="7rem"
-        alt="Imagem não encontrada"
-      >
-      </v-img>
-    </template>
-    <template v-slot:[`item.mobileSpotlightImage`]="{ item }">
-      <v-img
-        :src="item.mobileSpotlightImage"
-        height="7rem"
-        width="7rem"
-        alt="Imagem não encontrada"
-      >
-      </v-img>
-    </template>
+  <v-container fluid>
+    <v-card class="mx-auto" width="100%" max-width="1400px">
+      <v-card-title class="mb-3">
+        <v-row justify="start" justify-md="start" align="baseline">
+          <h4 class="ma-3">Marcas</h4>
+          <v-btn fab small @click="newModal = !newModal" 
+            ><v-icon>mdi-plus</v-icon></v-btn
+          >
+        </v-row>
+      </v-card-title>
 
-    <template v-slot:[`item.actions`]="{ item }">
-      <v-row justify="center" class="py-1 mt-1">
-        <v-btn small text><v-icon>mdi-pencil</v-icon> Editar</v-btn>
-      </v-row>
-      <v-row justify="center" class="py-1 mb-1">
-        <v-btn small text @click="confirmDeleteModal(item)"><v-icon>mdi-delete</v-icon> Deletar</v-btn>
-      </v-row>
-    </template>
-    <template v-slot:top>
-      <v-toolbar flat>
-        <v-toolbar-title>Marcas</v-toolbar-title>
-        <v-divider class="mx-4" inset vertical></v-divider>
-        <v-spacer></v-spacer>
+      <v-data-table :headers="cabecalho" :items="brands" sort-by="nome">
+        <template v-slot:[`item.desktopSpotlightImage`]="{ item }">
+          <v-img
+            :src="item.desktopSpotlightImage"
+            height="7rem"
+            width="7rem"
+            alt="Imagem não encontrada"
+            style="display: inline-block"
+          >
+          </v-img>
+        </template>
+        <template v-slot:[`item.mobileSpotlightImage`]="{ item }">
+          <v-img
+            :src="item.mobileSpotlightImage"
+            height="7rem"
+            width="7rem"
+            alt="Imagem não encontrada"
+            style="display: inline-block"
+          >
+          </v-img>
+        </template>
 
-        <!-- formulario -->
-        <v-dialog v-model="dialog" max-width="500px">
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn color="white" darkr v-bind="attrs" v-on="on"> NEW </v-btn>
-          </template>
-          <v-card>
-            <v-card-title>
-              <span class="headline">Nova Marca</span>
-            </v-card-title>
-            <v-card-text>
-              <v-container>
-                <v-row justify="center" align="center">
-                  <v-col class="mb-0 pb-0" cols="12" sm="6" md="12">
-                    <v-text-field
-                      outlined
-                      v-model="editedItem.nome"
-                      label="Nome"
-                    >
-                    </v-text-field>
-                  </v-col>
+        <template v-slot:[`item.actions`]="{ item }">
+          <v-row justify="center" class="py-1 mt-1">
+            <v-btn small text @click="getOneBrandToEdit(item)"
+              ><v-icon>mdi-pencil</v-icon> Editar</v-btn
+            >
+          </v-row>
+          <v-row justify="center" class="py-1 mb-1">
+            <v-btn small text @click="confirmDeleteModal(item)"
+              ><v-icon>mdi-delete</v-icon> Deletar</v-btn
+            >
+          </v-row>
+        </template>
+      </v-data-table>
 
-                  <v-col class="mb-0 ml-2">
-                    <v-row align="center">
-                      <v-checkbox value></v-checkbox>
-                      <p class="mt-4">Promocional</p>
-                    </v-row>
-                  </v-col>
+      <v-dialog v-model="newModal" max-width="800px">
+        <FormularioMarca />
+      </v-dialog>
 
-                  <!-- START UPLOAD IMG DESKTOP -->
-
-                  <v-col cols="12" sm="6" md="12" lg="12">
-                    <v-card style="background: #0b7ad1">
-                      <v-btn small fab class="mb-2 mt-2 ml-2 txtBtn">
-                        <v-file-input
-                          accept="image/png, image/jpeg, image/bmp"
-                          @change="previwerimage"
-                          class="ml-2 mb-2"
-                          prepend-icon="mdi-remote-desktop"
-                          filled
-                          hide-input
-                        >
-                        </v-file-input>
-                      </v-btn>
-                      <label style="color: white" class="ml-4"
-                        >Imagem Desktop</label
-                      >
-                    </v-card>
-                    <v-card height="auto" class="mt-3" elevation="1">
-                      <v-row class="ml-4" justify="start">
-                        <v-col cols="3">
-                          <v-card elevation="0">
-                            <v-img
-                              class="mt-2"
-                              max-height="70px"
-                              max-width="70px"
-                              :src="editedItem.imagemDesktop.previwer"
-                            ></v-img>
-                          </v-card>
-                        </v-col>
-                        <v-col align="start" cols="6">
-                          <p
-                            style="font-size: 10px"
-                            v-if="editedItem.imagemDesktop.nome"
-                          >
-                            {{ editedItem.imagemDesktop.nome }}
-                          </p>
-                        </v-col>
-                        <v-col class="btnX" align="end" cols="1">
-                          <v-btn
-                            @click="
-                              (editedItem.imagemDesktop.previwer = ''),
-                                (editedItem.imagemDesktop.nome = '')
-                            "
-                            v-if="editedItem.imagemDesktop.previwer"
-                            text
-                            fab
-                            small
-                          >
-                            <v-icon small>mdi-delete</v-icon>
-                          </v-btn>
-                        </v-col>
-                      </v-row>
-                    </v-card>
-                  </v-col>
-
-                  <!-- END UPLOAD IMG DESKTOP -->
-
-                  <!-- STARTP UPLOAD IMG MOBILE -->
-
-                  <v-col cols="12" sm="6" md="12" lg="12">
-                    <v-card style="background: #0b7ad1">
-                      <v-btn small fab class="mb-2 mt-2 ml-2 txtBtn">
-                        <v-file-input
-                          accept="image/png, image/jpeg, image/bmp"
-                          @change="previwerImageMob"
-                          class="ml-2 mb-2"
-                          prepend-icon="mdi-cellphone"
-                          filled
-                          hide-input
-                        >
-                        </v-file-input>
-                      </v-btn>
-                      <label style="color: white" class="ml-4"
-                        >Imagem Mobile</label
-                      >
-                    </v-card>
-                    <v-card class="mt-3">
-                      <v-row class="ml-4" justify="start">
-                        <v-col cols="3">
-                          <v-card elevation="0">
-                            <v-img
-                              class="mt-2"
-                              max-height="70"
-                              max-width="70"
-                              :src="editedItem.imagemMobile.previwer"
-                            ></v-img>
-                          </v-card>
-                        </v-col>
-                        <v-col align="start" cols="6">
-                          <p
-                            class="mt-2"
-                            style="font-size: 10px; width: 100px"
-                            v-if="editedItem.imagemMobile.nome"
-                          >
-                            {{ editedItem.imagemMobile.nome }}
-                          </p>
-                        </v-col>
-                        <v-col class="btnX" align="end" cols="1">
-                          <v-btn
-                            @click="
-                              (editedItem.imagemMobile.previwer = ''),
-                                (editedItem.imagemMobile.nome = '')
-                            "
-                            v-if="editedItem.imagemMobile.previwer"
-                            text
-                            fab
-                            small
-                          >
-                            <v-icon small>mdi-delete</v-icon>
-                          </v-btn>
-                        </v-col>
-                      </v-row>
-                    </v-card>
-                  </v-col>
-
-                  <!-- END UPLOAD IMG MOBILE -->
-
-                  <v-col class="mt-6">
-                    <v-row justify="end">
-                      <v-btn
-                        small
-                        text
-                        @click="postBrand(), getBrand(), (dialog = false)"
-                      >
-                        <v-icon color="primary" small> mdi-check </v-icon>
-                        <a class="ml-1">Save</a>
-                      </v-btn>
-                      <v-btn
-                        small
-                        text
-                        @click="
-                          (editedItem.imagemDesktop.previwer = ''),
-                            (editedItem.imagemDesktop.nome = ''),
-                            (editedItem.imagemMobile.previwer = ''),
-                            (editedItem.imagemMobile.nome = ''),
-                            (editedItem.nome = ''),
-                            (dialog = false)
-                        "
-                      >
-                        <v-icon small color="error"> mdi-close </v-icon>
-                        <a class="ml-1" style="color: Red">Cancel</a>
-                      </v-btn>
-                    </v-row>
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-card-text>
-          </v-card>
-        </v-dialog>
-      </v-toolbar>
-    </template>
-    <v-dialog v-model="deleteModal" max-width="800px">
-      <DeleteModal
-        @close-modal="deleteModal = false"
-        categoria="Produto"
-      />
-    </v-dialog>
-  </v-data-table>
+      <v-dialog v-model="deleteModalShow">
+        <DeleteModal
+          @action="deleteBrand()"
+          @close-modal="deleteModalShow = false"
+        />
+      </v-dialog>
+    </v-card>
+  </v-container>
 </template>
 <script>
 import axios from "axios";
 import DeleteModal from "@/components/Common/DeleteModal";
+import FormularioMarca from './FormularioMarca'
 
 export default {
   name: "Marca",
 
   data: () => ({
-    dialog: false,
+    newModal: false,
     brandID: "",
     img64Mob: "",
     img64Desk: "",
@@ -255,6 +93,11 @@ export default {
         mobileSpotlightImage: " ",
       },
     ],
+
+    brand: {
+      name: "",
+    },
+
     editedItem: {
       nome: "",
       imagemDesktop: {
@@ -269,8 +112,10 @@ export default {
       },
     },
 
+    brandToEdit: {},
+
     deleteTemp: {},
-    deleteModal: false
+    deleteModalShow: false,
   }),
   created() {
     this.getBrand();
@@ -308,6 +153,17 @@ export default {
         this.brandID = response.data[response.data.length - 1].id;
       });
     },
+
+    async getOneBrandToEdit(brand) {
+      await axios
+        .get(`http://localhost:5000/api/Brand/${brand.id}`)
+        .then((response) => {
+          this.editedItem.nome = response.data.name;
+          console.log(response.data);
+          this.newModal = true;
+        });
+    },
+
     async getBrand() {
       await axios.get(`http://localhost:5000/api/Brand`).then((response) => {
         this.brands = response.data;
@@ -348,18 +204,22 @@ export default {
     },
 
     confirmDeleteModal(item) {
-      this.deleteModal = true
-      this.deleteTemp = item
+      this.deleteModalShow = true;
+      this.deleteTemp = item;
     },
 
     async deleteBrand() {
-      await axios.delete(`http://localhost:5000/api/Brand/${this.deleteTemp.id}`).then(() => this.deleteModal = false) 
-    }
+      await axios
+        .delete(`http://localhost:5000/api/Brand/${this.deleteTemp.id}`)
+        .then(() => (this.deleteModal = false));
+      document.location.reload(true);
+    },
   },
 
   components: {
-    DeleteModal
-  }
+    DeleteModal,
+    FormularioMarca,
+  },
 };
 </script>
 <style>
