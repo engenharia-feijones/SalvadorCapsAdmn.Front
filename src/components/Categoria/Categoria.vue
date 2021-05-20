@@ -39,6 +39,7 @@
             height="7rem"
             width="7rem"
             alt="Imagem não encontrada"
+            style="display: inline-block"
           ></v-img>
         </template>
 
@@ -48,6 +49,7 @@
             height="7rem"
             width="7rem"
             alt="Imagem não encontrada"
+            style="display: inline-block"
           ></v-img>
         </template>
 
@@ -85,10 +87,8 @@
     <v-dialog v-model="editarModal" max-width="800px">
       <Formulario
         :editarCategoria="editarCategoriaTemp"
-        @fechar-formulario="
-          editarModal = false;
-          getCategorias();
-        "
+        @fechar-formulario="editarModal = false;"
+        @update-feito="getCategorias(); gambiarraEmergencial()"
         v-if="editarModal"
       />
     </v-dialog>
@@ -144,7 +144,7 @@ export default {
       { text: "Ações", align: "center", value: "actions" },
     ],
 
-    categorias: [{ nome: "teste", desktop: "a", mobile: "b" }],
+    categorias: [{ name: "", desktopSpotlightImage: "", mobileSpotlightImage: "", actions: ""}],
     filterData: [],
     filterCategorias: [],
     deletarCategoriaTemp: {},
@@ -177,7 +177,7 @@ export default {
           this.dialogDeleteError = true;
         });
 
-      this.getCategorias();
+      await this.getCategorias();
     },
 
     async getCategorias() {
@@ -185,32 +185,30 @@ export default {
       await axios.get(`http://localhost:5000/api/Category`).then((response) => {
         this.categorias = response.data;
         this.loading = false;
-        console.log(this.categorias)
       });
       this.categorias.map((categoria) => {
         this.filterData = [...this.filterData, categoria.name];
       });
+
+      console.log(".")
+    },
+
+    async closeModal() {
+      await this.getCategorias();
     },
 
     async putCategoria(infos) {
       this.editarModal = !this.editarModal;
       this.editarCategoriaTemp = infos;
     },
+
+    gambiarraEmergencial() {
+      document.location.reload(true)
+    }
   },
 
-  computed: {
-    isMobile() {
-      switch (this.$vuetify.breakpoint.name) {
-        case "xs":
-          return true;
-        default:
-          return false;
-      }
-    },
-  },
-
-  created() {
-    this.getCategorias();
+  async created() {
+    await this.getCategorias();
   },
 
   components: {

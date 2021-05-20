@@ -204,14 +204,21 @@ export default {
         })
         .then(async () => {
           await this.getLastCategoryId();
-          this.imagePreviewDesktop 
-            await this.postCategoryImage( this.categoriasNovas.desktopPreviewName, this.categoriasNovas.desktopBlob, 1);
-          this.imagePreviewMobile &&
-            (await this.postCategoryImage(
+          if (this.imagePreviewDesktop) {
+            await this.postCategoryImage(
+              this.categoriasNovas.desktopPreviewName,
+              this.categoriasNovas.desktopBlob,
+              1
+            );
+          }
+
+          if (this.imagePreviewMobile) {
+            await this.postCategoryImage(
               this.categoriasNovas.mobilePreviewName,
               this.categoriasNovas.mobileBlob,
               2
-            ));
+            );
+          }
         });
       this.$emit("cadastro-feito");
       this.fecharModal();
@@ -223,26 +230,45 @@ export default {
           name: this.categoriasNovas.name,
         })
         .then(async () => {
-          if(this.imagePreviewDesktop) {
+          if (this.imagePreviewDesktop) {
             if (this.categoriasNovas.desktopSpotlightImageID) {
-              await this.putCategoryImage( this.categoriasNovas.id, this.categoriasNovas.desktopSpotlightImageID, this.categoriasNovas.desktopPreviewName, this.categoriasNovas.desktopBlob, 1);
+              await this.putCategoryImage(
+                this.categoriasNovas.id,
+                this.categoriasNovas.desktopSpotlightImageID,
+                this.categoriasNovas.desktopPreviewName,
+                this.categoriasNovas.desktopBlob,
+                1
+              );
             } else {
-              this.categoryID = this.categoriasNovas.id
-              await this.postCategoryImage(this.categoriasNovas.desktopPreviewName, this.categoriasNovas.desktopBlob, 1)
+              this.categoryID = this.categoriasNovas.id;
+              await this.postCategoryImage(
+                this.categoriasNovas.desktopPreviewName,
+                this.categoriasNovas.desktopBlob,
+                1
+              );
             }
           }
-          
+
           if (this.imagePreviewMobile) {
             if (this.categoriasNovas.mobileSpotlightImageID) {
-              await this.putCategoryImage( this.categoriasNovas.id, this.categoriasNovas.mobileSpotlightImageID, this.categoriasNovas.mobilePreviewName, this.categoriasNovas.mobileBlob, 2)
+              await this.putCategoryImage(
+                this.categoriasNovas.id,
+                this.categoriasNovas.mobileSpotlightImageID,
+                this.categoriasNovas.mobilePreviewName,
+                this.categoriasNovas.mobileBlob,
+                2
+              );
             } else {
-              this.categoryID = this.categoriasNovas.id
-              await this.postCategoryImage( this.categoriasNovas.mobilePreviewName, this.categoriasNovas.mobileBlob, 2)
+              this.categoryID = this.categoriasNovas.id;
+              await this.postCategoryImage(
+                this.categoriasNovas.mobilePreviewName,
+                this.categoriasNovas.mobileBlob,
+                2
+              );
             }
           }
-            
         });
-      this.$emit("cadastro-feito");
+      this.$emit("update-feito");
       this.fecharModal();
     },
 
@@ -253,7 +279,6 @@ export default {
     },
 
     async postCategoryImage(name, data, destination) {
-      
       await axios.post(`http://localhost:5000/api/CategoryImage`, {
         categoryID: this.categoryID,
         blobFile: {
@@ -265,14 +290,16 @@ export default {
     },
 
     async putCategoryImage(categoryID, id, name, data, destination) {
-      await axios.put(`http://localhost:5000/api/CategoryImage/${id}`, {
-        categoryID: +categoryID,
-        blobFile: {
-          name: name ?? " ",
-          data: data ?? " ",
-        },
-        destination: destination,
-      }).then(this.deleteCategoryImage(id))
+      await axios
+        .put(`http://localhost:5000/api/CategoryImage/${id}`, {
+          categoryID: +categoryID,
+          blobFile: {
+            name: name ?? " ",
+            data: data ?? " ",
+          },
+          destination: destination,
+        })
+        // .then(this.deleteCategoryImage(id));
     },
 
     async deleteCategoryImage(id) {

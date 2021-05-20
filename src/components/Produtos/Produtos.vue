@@ -19,8 +19,9 @@
           no-data-text="Nenhum Produto Encontrado."
           mobile-breakpoint="0"
         >
-          <template v-slot:[`item.image`]="{ item }">
+          <template v-slot:[`item.image`]="{ item }" >
             <v-img
+              v-if="show"
               :src="item.image"
               height="7rem"
               width="7rem"
@@ -86,6 +87,7 @@ export default {
   name: "Produtos",
   data: () => ({
     newModal: false,
+    show: false,
     deleteModal: false,
     errorModal: false,
     editModal: false,
@@ -161,14 +163,14 @@ export default {
 
     async getProdutos() {
       this.loading = true;
+      this.show = false
       await axios
         .get(`http://localhost:5000/api/Product`)
         .then(async (response) => {
           this.products = await response.data;
-          console.log(response.data);
           this.loading = false;
+          this.show = true
         });
-      console.log("get");
     },
 
     async deleteProduct() {
@@ -197,20 +199,10 @@ export default {
     },
 
     async closeModal() {
+      document.location.reload(true)
       await this.getProdutos();
       this.newModal = false;
       this.editModal = false;
-    },
-  },
-
-  computed: {
-    isMobile() {
-      switch (this.$vuetify.breakpoint.name) {
-        case "xs":
-          return true;
-        default:
-          return false;
-      }
     },
   },
 

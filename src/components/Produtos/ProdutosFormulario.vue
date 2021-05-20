@@ -11,6 +11,9 @@
           <v-btn fab icon @click="closeModal"><v-icon>mdi-close</v-icon></v-btn>
         </v-row>
       </v-card-title>
+      <v-card-text v-if="editProduct">
+        <v-img :src='editProduct.image'></v-img>
+      </v-card-text>
       <v-card-text>
         <v-col cols="12">
           <v-text-field
@@ -88,14 +91,11 @@
               <v-img
                 width="3rem"
                 height="50px"
-                :src="imagePreviewDetails.image"
+                :src="imagePreviewDetails.preview"
               ></v-img>
             </v-col>
             <v-col cols="3">
-              <p>{{ imagePreviewDetails.imageID }}</p>
-            </v-col>
-            <v-col cols="3">
-              <p>{{ imagePreviewDetails.size }}</p>
+              <p>{{ imagePreviewDetails.name }}</p>
             </v-col>
             <v-col cols="2">
               <v-btn x-small @click="removerPreview()">X</v-btn>
@@ -180,6 +180,14 @@ export default {
       imageID: "",
       productCategoryDetails: [],
     },
+    imagePreview: null,
+    imagePreviewDetails: {
+      id: 0,
+      blob: "",
+      preview: "",
+    },
+
+    lastProductID: 0,
 
     codeRules: [(code) => !!code || "Insira um código para o produto"],
 
@@ -194,11 +202,8 @@ export default {
     priceRules: [(price) => !!price || "Insira o preço do produto"],
 
     descriptionRules: [(desc) => !!desc || "Insira a descrição do produto"],
-
+  
     removeChip: [],
-    imagePreview: null,
-    imagePreviewDetails: {},
-
     categorys: [{ detail: "" }],
     categorysDetail: [],
     selectedDetail: [],
@@ -215,18 +220,6 @@ export default {
   },
 
   methods: {
-    cleanForm() {
-      this.produto = {
-        brandID: "",
-        code: "",
-        name: "",
-        externalName: "",
-        description: "",
-        price: "",
-        imageID: "",
-        productCategoryDetails: [],
-      };
-    },
 
     removeDetailChip(chipIndex) {
       this.selectedDetail = [
@@ -256,18 +249,23 @@ export default {
     async editInsertDetailIntoChip() {
       await this.$forceUpdate();
       this.produto.productCategoryDetails.forEach(async (category) => {
+        
         this.categorys.map(async (cat) => {
+          
           let detailName = cat.detail?.filter(
             (filtred) => filtred.id === category.categoryDetailID
           )[0]?.name;
-          console.log(cat.detail);
+          
           if (detailName) {
+            
             category = { id: category.categoryDetailID, name: detailName };
+            
             this.selectedDetail = [
               ...this.selectedDetail,
               { detail: { ...category } },
             ];
           }
+
         });
       });
     },
@@ -277,9 +275,15 @@ export default {
     },
 
     previewImage(file) {
-      this.imagePreviewDetails.imageID = file.name;
-      this.imagePreviewDetails.image = window.URL.createObjectURL(file);
-      this.imagePreviewDetails.size = Math.floor(+file.size / 1024) + "KBs";
+
+      const reader = new FileReader() 
+      
+      this.imagePreviewDetails.name = file.name;
+      reader.readAsDataURL(file);
+      reader.onloadend = () => {
+        this.imagePreviewDetails.blob = reader.result?.toString().replace("data:", "").replace(/^.+,/, "");
+        this.imagePreviewDetails.preview = `data:image/jpeg;charset=utf-8;base64,${this.imagePreviewDetails.blob}`;
+      }
     },
 
     removerPreview() {
@@ -330,6 +334,12 @@ export default {
          this.$forceUpdate();
     },
 
+    async getLastProductId() {
+      await axios.get(`http://localhost:5000/api/Product`).then((response) => {
+        this.lastProductID = response.data[response.data.length - 1]?.id;
+      })
+    },
+
     async getCategorysDeail() {},
 
     async postProduct() {
@@ -340,9 +350,23 @@ export default {
         externalName: this.produto.externalName,
         description: this.produto.description,
         price: +this.produto.price,
-        imageID: this.imagePreviewDetails.imageID,
         productCategoryDetails: this.produto.productCategoryDetails,
-      });
+      }).then(async () => {
+        if (this.imagePreview) {
+          await this.getLastProductId()
+          await this.postProductImage()
+        }
+      })
+    },
+
+    async postProductImage() {
+      await axios.post(`http://localhost:5000/api/ProductImage`, {
+        productID: +this.lastProductID,
+        blobFile: {
+          name: this.imagePreviewDetails.name,
+          data: this.imagePreviewDetails.blob
+        }
+      })
     },
 
     async putProduct() {
@@ -353,10 +377,29 @@ export default {
         externalName: this.produto.externalName,
         description: this.produto.description,
         price: +this.produto.price,
-        imageID: this.imagePreviewDetails.imageID,
         productCategoryDetails: this.produto.productCategoryDetails,
+      }).then(async () => {
+        if (this.imagePreview) {
+          this.lastProductID = this.produto.id
+          if (this.produto.imageID) {
+            await this.putProductImage()
+          } else {
+            await this.postProductImage()
+          }
+        }
       });
     },
+
+    async putProductImage() {
+      await axios.put(`http://localhost:5000/api/ProductImage/${this.produto.imageID}`, {
+        productID: this.lastProductID,
+        blobFile: {
+          name: this.imagePreviewDetails.name,
+          data: this.imagePreviewDetails.blob
+        }
+      })
+    }
+
   },
 
   watch: {
