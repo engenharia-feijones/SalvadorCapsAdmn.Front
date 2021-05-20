@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container fluid>
     <v-card class="mx-auto" width="100%" max-width="1400px">
       <v-card-title>
         <v-col cols="12">
@@ -10,40 +10,68 @@
             >
           </v-row>
         </v-col>
-        </v-card-title>
-      
-        <v-data-table
-          :headers="headers"
-          :items="products"
-          hide-default-footer
-          no-data-text="Nenhum Produto Encontrado."
-          mobile-breakpoint="0"
-        >
-          <template v-slot:[`item.image`]="{ item }" >
-            <v-img
-              v-if="show"
-              :src="item.image"
-              height="7rem"
-              width="7rem"
-              alt="Imagem não encontrada"
-              style="display: inline-block"
-            ></v-img>
-          </template>
+      </v-card-title>
 
-          <template v-slot:[`item.actions`]="{ item }">
-            <v-row justify="center" class="py-1 mt-1">
-              <v-btn small text @click="editProduct(item)"
-                ><v-icon>mdi-pencil</v-icon> Editar</v-btn
-              >
-            </v-row>
-            <v-row justify="center" class="py-1 mb-1">
-              <v-btn small text @click="confirmDeleteProduct(item)"
-                ><v-icon>mdi-delete</v-icon> Deletar</v-btn
-              >
-            </v-row>
-          </template>
-        </v-data-table>
-   
+      <v-card-text>
+        <v-row>
+          <v-col cols="12" sm="4" md="4">
+            <v-text-field
+              prepend-icon="mdi-magnify"
+              placeholder="Pesquisar Código..."
+              v-model="searchCode"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" sm="4" md="4">
+            <v-text-field
+              prepend-icon="mdi-magnify"
+              placeholder="Pesquisar Produto..."
+              v-model="searchProduct"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" sm="4" md="4">
+            <v-select
+              :items="searchCategoryName"
+              @change="getProductByCategory()"
+              v-model="selectedSearchCategory"
+              clearable
+              prepend-icon="mdi-magnify"
+              placeholder="Pesquisar Categoria..."
+            ></v-select>
+          </v-col>
+        </v-row>
+      </v-card-text>
+
+      <v-data-table
+        :headers="headers"
+        :items="filtredProduct"
+        hide-default-footer
+        no-data-text="Nenhum Produto Encontrado."
+        mobile-breakpoint="0"
+      >
+        <template v-slot:[`item.image`]="{ item }">
+          <v-img
+            v-if="show"
+            :src="item.image"
+            height="7rem"
+            width="7rem"
+            alt="Imagem não encontrada"
+            style="display: inline-block"
+          ></v-img>
+        </template>
+
+        <template v-slot:[`item.actions`]="{ item }">
+          <v-row justify="center" class="py-1 mt-1">
+            <v-btn small text @click="editProduct(item)"
+              ><v-icon>mdi-pencil</v-icon> Editar</v-btn
+            >
+          </v-row>
+          <v-row justify="center" class="py-1 mb-1">
+            <v-btn small text @click="confirmDeleteProduct(item)"
+              ><v-icon>mdi-delete</v-icon> Deletar</v-btn
+            >
+          </v-row>
+        </template>
+      </v-data-table>
     </v-card>
 
     <!-- START POST PRODUCT -->
@@ -98,6 +126,9 @@ export default {
     products: [],
     filtredProducts: [],
     filterCategory: [],
+    searchCategory: [],
+    searchCategoryName: [],
+    selectedSearchCategory: "",
 
     headers: [
       { text: "Código", aling: "center", value: "code" },
@@ -108,46 +139,13 @@ export default {
 
     productTemp: {},
 
-    searchName: "",
-    selectedCode: "",
+    searchCode: "",
+    searchProduct: "",
+
     selectedFitlerCategory: null,
   }),
 
   methods: {
-    filterSearch() {
-      this.handleSearchData();
-      if (this.selectedCode !== "" && this.searchName !== "") {
-        this.filtredProducts = this.products.filter(
-          (product) =>
-            product.code === this.selectedCode &&
-            product.name.toLowerCase().includes(this.searchName.toLowerCase())
-        );
-      } else if (this.selectedCode !== "" || this.searchName !== "") {
-        if (this.selectedCode !== "") {
-          this.filtredProducts = this.products.filter(
-            (product) => product.code === this.selectedCode
-          );
-        } else if (this.searchName !== "") {
-          this.filtredProducts = this.products.filter((product) =>
-            product.name.toLowerCase().includes(this.searchName.toLowerCase())
-          );
-        }
-      }
-
-      this.filterResults =
-        this.selectedCode !== "" ||
-        this.selectedFitlerCategory ||
-        this.searchName != ""
-          ? true
-          : false;
-    },
-
-    handleSearchData() {
-      this.searchName = this.searchName.trim();
-      this.selectedCode =
-        this.selectedCode === "" ? this.selectedCode : +this.selectedCode;
-    },
-
     confirmDeleteProduct(product) {
       this.deleteModal = true;
       this.productTemp = product;
@@ -157,20 +155,20 @@ export default {
       await axios
         .get(`http://localhost:5000/api/Product/${temp.id}`)
         .then((response) => {
-          this.productTemp = response.data
+          this.productTemp = response.data;
           this.editModal = !this.editModal;
         });
     },
 
     async getProdutos() {
       this.loading = true;
-      this.show = false
+      this.show = false;
       await axios
         .get(`http://localhost:5000/api/Product`)
         .then(async (response) => {
           this.products = await response.data;
           this.loading = false;
-          this.show = true
+          this.show = true;
         });
     },
 
@@ -192,24 +190,72 @@ export default {
 
     async getCategory() {
       await axios.get(`http://localhost:5000/api/Category`).then((response) => {
-        response.data.map(
+        this.searchCategory = response.data;
+        this.searchCategory.forEach(
           (category) =>
-            (this.filterCategory = [...this.filterCategory, category.name])
+            (this.searchCategoryName = [
+              ...this.searchCategoryName,
+              category.name,
+            ])
         );
       });
     },
 
+    async getProductByCategory() {
+      if (this.selectedSearchCategory) {
+        let categoryID = +this.searchCategory.filter(
+          (category) => category.name === this.selectedSearchCategory
+        )[0].id;
+        await axios
+          .get(`http://localhost:5000/api/Product/?categoryID=${categoryID}`)
+          .then((response) => {
+            (this.products = response.data)
+            console.log(response.data)
+          });
+      } else {
+        await this.getProdutos();
+      }
+    },
+
     async closeModal() {
-      document.location.reload(true)
+      document.location.reload(true);
       await this.getProdutos();
       this.newModal = false;
       this.editModal = false;
     },
+
+    filterCode(product) {
+      return +product.code === +this.searchCode;
+    },
+
+    filterName(product) {
+      return product.name
+        .toLowerCase()
+        .includes(this.searchProduct.toLowerCase());
+    },
   },
 
-  mounted() {
-    this.getCategory();
-    this.getProdutos();
+  computed: {
+    filtredProduct() {
+      let conditions = [];
+
+      this.searchCode && conditions.push(this.filterCode);
+      this.searchProduct && conditions.push(this.filterName);
+      // this.searchCategory && conditions.push(this.searchCategory)
+
+      if (conditions.length > 0) {
+        return this.products.filter((product) => {
+          return conditions.every((condition) => condition(product));
+        });
+      }
+
+      return this.products;
+    },
+  },
+
+  async mounted() {
+    await this.getCategory();
+    await this.getProdutos();
   },
 
   components: {

@@ -11,16 +11,15 @@
       </v-card-title>
 
       <v-card-text>
-        <v-col cols="12" sm="10" md="6">
+        <v-col cols="12" md="6">
           <v-row justify="start" justify-md="space-around" align="center">
-            <v-autocomplete
+            <v-text-field
               :items="filterData"
               v-model="filter"
               clearable
               prepend-inner-icon="mdi-magnify"
-              no-data-text="Categoria não encontrada."
-            ></v-autocomplete>
-            <v-btn class="mx-3" @click="filterCategory">Buscar</v-btn>
+              placeholder="Pesquisar Categorias..."
+            ></v-text-field>
           </v-row>
         </v-col>
       </v-card-text>

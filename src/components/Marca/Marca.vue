@@ -3,14 +3,24 @@
     <v-card class="mx-auto" width="100%" max-width="1400px">
       <v-card-title class="mb-3">
         <v-row justify="start" justify-md="start" align="baseline">
-          <h4 class="ma-3">Marcas</h4>
+          <h2 class="ma-3">Marcas</h2>
           <v-btn fab small @click="newModal = !newModal" 
             ><v-icon>mdi-plus</v-icon></v-btn
           >
         </v-row>
       </v-card-title>
-
-      <v-data-table :headers="cabecalho" :items="brands" sort-by="nome" mobile-breakpoint="0" hide-default-footer>
+      <v-card-text>
+        <v-col cols="12" md="4"> 
+          <v-text-field
+            v-model="search"
+            placeholder="Pesquisar Marcas..."
+            clearable
+            prepend-inner-icon="mdi-magnify"
+            no-data-text="teste"
+          ></v-text-field>
+        </v-col>
+      </v-card-text>
+      <v-data-table :headers="cabecalho" :items="brands" :search="search" sort-by="nome" mobile-breakpoint="0" hide-default-footer no-data-text="Nenhuma Marca Encontrada.">
         <template v-slot:[`item.desktopSpotlightImage`]="{ item }">
           <v-img
             :src="item.desktopSpotlightImage"
@@ -85,9 +95,9 @@ export default {
     editModal: false,
     deleteModalShow: false,
     deleteModalErrorShow: false,
+    
     brandID: "",
-    img64Mob: "",
-    img64Desk: "",
+    search: "",
     cabecalho: [
       { text: "Nome", align: "start", value: "name" },
       {
@@ -112,20 +122,6 @@ export default {
 
     brand: {
       name: "",
-    },
-
-    editedItem: {
-      nome: "",
-      imagemDesktop: {
-        nome: "",
-        url: "",
-        previwer: "",
-      },
-      imagemMobile: {
-        nome: "",
-        url: "",
-        previwer: "",
-      },
     },
 
     brandToEdit: {},
