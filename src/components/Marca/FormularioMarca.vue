@@ -1,18 +1,20 @@
 <template>
   <v-form lazy-validation ref="form">
     <v-card>
-      <v-col cols="12" v-if="editBrand" align="center">
+       <v-col cols="12" v-if="editBrand" align="center">
         <img :src="editBrand.desktopSpotlightImage" alt="#" width="50%" />
       </v-col>
       <v-col cols="12" align="center" v-if="editBrand">
         <img :src="editBrand.mobileSpotlightImage" alt="#" width="50%" />
-      </v-col>
+      </v-col> 
 
       <v-card-title>
         <span class="headline">Nova Marca</span>
       </v-card-title>
+
       <v-card-text>
         <v-container>
+          
           <v-row justify="center" align="center">
             <v-col class="mb-0 pb-0" cols="12" md="12">
               <v-text-field
@@ -23,8 +25,8 @@
               >
               </v-text-field>
             </v-col>
-
-            <!-- <v-col class="mb-0 ml-2">
+      
+            <!-- <v-col class="mb-0 ml-2">|
               <v-row align="center">
                 <v-checkbox value></v-checkbox>
                 <p class="mt-4">Promocional</p>
@@ -32,13 +34,13 @@
             </v-col> -->
           </v-row>
 
-          <v-col cols="12" md="12" lg="12">
-            <v-btn small fab class="my-2 ml-1 txtBtn">
+          <v-col cols="12" md="12">
+            <v-btn small fab class=" ml-1 txtBtn">
               <v-file-input
                 accept="image/png, image/jpeg, image/bmp"
                 @change="readBase64Desktop"
                 v-model="fileDesktop"
-                class="ml-2 mb-2"
+                class=" mb-2 ml-1"
                 prepend-icon="mdi-remote-desktop"
                 filled
                 hide-input
@@ -46,9 +48,9 @@
               </v-file-input>
             </v-btn>
             <label class="ml-4">Imagem Desktop</label>
-            <v-card>
-              <v-row
-                v-if="fileDesktop"
+            <!-- <v-card > -->
+               <v-row
+              v-if="fileDesktop"
                 justify="center"
                 align="center"
                 align-md="baseline"
@@ -67,10 +69,10 @@
                 <v-col cols="2">
                   <v-btn x-small @click="removerPreview('Desktop')">X</v-btn>
                 </v-col>
-              </v-row>
-            </v-card>
+              </v-row> 
+            <!-- </v-card> -->
           </v-col>
-          <v-col cols="12" sm="6" md="12" lg="12">
+          <v-col cols="12" md="12">
             <v-btn small fab class="txtBtn">
               <v-file-input
                 @change="readBase64Mobile"
@@ -83,7 +85,7 @@
               </v-file-input>
             </v-btn>
             <label class="ml-4">Imagem Mobile</label>
-            <v-row
+             <v-row
               v-if="fileMobile"
               justify="center"
               align="center"
@@ -106,20 +108,21 @@
             </v-row>
           </v-col>
         </v-container>
-      </v-card-text>
-      <v-card-actions class="mt-5">
-        <v-row justify="end">
-          <v-btn text color="blue" @click="closeModal()"
+        <v-card-actions >
+        <v-row justify="end" >
+          <v-btn text color="blue" @click.prevent="closeModal()"
             ><v-icon>mdi-close</v-icon>Cancelar</v-btn
           >
-          <v-btn text color="blue" v-if="!editBrand" @click="validateForm()"
+          <v-btn text color="blue" v-show="!editBrand" @click="validateForm()"
             ><v-icon>mdi-check</v-icon>Salvar</v-btn
           >
-          <v-btn text color="blue" @click="validateForm()" v-else
+          <v-btn text color="blue" @click.prevent="validateForm()" v-show="editBrand"
             ><v-icon>mdi-check</v-icon>Editar</v-btn
           >
         </v-row>
       </v-card-actions>
+      </v-card-text>
+       
     </v-card>
   </v-form>
 </template>

@@ -56,7 +56,7 @@
         </template>
       </v-data-table>
 
-      <v-dialog v-model="newModal" v-if="newModal" max-width="800px">
+      <v-dialog v-model="newModal" v-if="newModal" max-width="810px">
         <FormularioMarca 
           @close-modal="closeModal()"
         />
