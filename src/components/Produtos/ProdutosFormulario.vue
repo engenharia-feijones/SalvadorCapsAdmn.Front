@@ -306,7 +306,7 @@ export default {
 
     async getBrands() {
       await axios
-        .get(`http://localhost:5000/api/brand`)
+        .get(`https://salvadorcapsapi.azurewebsites.net/api/brand`)
         .then((response) => (this.brands = response.data));
       this.brands.map(
         (brand) => (this.brandsNames = [...this.brandsNames, brand.name])
@@ -315,14 +315,14 @@ export default {
 
     async getCategorys() {
       await axios
-        .get(`http://localhost:5000/api/category`)
+        .get(`https://salvadorcapsapi.azurewebsites.net/api/category`)
         .then((response) => (this.categorys = response.data))
         .then(() => {
           // TODO: REFACT THIS SHIT
           this.categorys.forEach(async (cat, index) => {
             await axios
               .get(
-                `http://localhost:5000/api/CategoryDetail/?categoryID=${cat.id}`
+                `https://salvadorcapsapi.azurewebsites.net/api/CategoryDetail/?categoryID=${cat.id}`
               )
               .then(
                 (response) =>
@@ -335,7 +335,7 @@ export default {
     },
 
     async getLastProductId() {
-      await axios.get(`http://localhost:5000/api/Product`).then((response) => {
+      await axios.get(`https://salvadorcapsapi.azurewebsites.net/api/Product`).then((response) => {
         this.lastProductID = response.data[response.data.length - 1]?.id;
       })
     },
@@ -343,7 +343,7 @@ export default {
     async getCategorysDeail() {},
 
     async postProduct() {
-      await axios.post(`http://localhost:5000/api/Product`, {
+      await axios.post(`https://salvadorcapsapi.azurewebsites.net/api/Product`, {
         brandID: +this.produto.brandID,
         code: +this.produto.code,
         name: this.produto.name,
@@ -360,7 +360,7 @@ export default {
     },
 
     async postProductImage() {
-      await axios.post(`http://localhost:5000/api/ProductImage`, {
+      await axios.post(`https://salvadorcapsapi.azurewebsites.net/api/ProductImage`, {
         productID: +this.lastProductID,
         blobFile: {
           name: this.imagePreviewDetails.name,
@@ -370,7 +370,7 @@ export default {
     },
 
     async putProduct() {
-      await axios.put(`http://localhost:5000/api/Product/${this.produto.id}`, {
+      await axios.put(`https://salvadorcapsapi.azurewebsites.net/api/Product/${this.produto.id}`, {
         brandID: +this.produto.brandID,
         code: +this.produto.code,
         name: this.produto.name,
@@ -391,7 +391,7 @@ export default {
     },
 
     async putProductImage() {
-      await axios.put(`http://localhost:5000/api/ProductImage/${this.produto.imageID}`, {
+      await axios.put(`https://salvadorcapsapi.azurewebsites.net/api/ProductImage/${this.produto.imageID}`, {
         productID: this.lastProductID,
         blobFile: {
           name: this.imagePreviewDetails.name,

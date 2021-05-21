@@ -168,7 +168,7 @@ export default {
     async deletarCategoria() {
       await axios
         .delete(
-          `http://localhost:5000/api/Category/${this.deletarCategoriaTemp.id}`
+          `https://salvadorcapsapi.azurewebsites.net/api/Category/${this.deletarCategoriaTemp.id}`
         )
         .then(() => (this.dialogDeletarCategoria = false))
         .catch(() => {
@@ -181,7 +181,7 @@ export default {
 
     async getCategorias() {
       this.loading = true;
-      await axios.get(`http://localhost:5000/api/Category`).then((response) => {
+      await axios.get(`https://salvadorcapsapi.azurewebsites.net/api/Category`).then((response) => {
         this.categorias = response.data;
         this.loading = false;
       });

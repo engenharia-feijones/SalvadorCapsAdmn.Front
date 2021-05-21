@@ -142,7 +142,7 @@ export default {
     },
 
     async postCategoryDetail() {
-      await axios.post(`http://localhost:5000/api/CategoryDetail`, {
+      await axios.post(`https://salvadorcapsapi.azurewebsites.net/api/CategoryDetail`, {
         categoryID: this.categoryID,
         name: this.novaCategoriaDetail.name,
       }).then(async () => {
@@ -155,7 +155,7 @@ export default {
     },
 
     async postCategoryDetailIcon() {
-      await axios.post(`http://localhost:5000/api/CategoryDetailImage`, {
+      await axios.post(`https://salvadorcapsapi.azurewebsites.net/api/CategoryDetailImage`, {
         categoryDetailID: this.categoryDetailID, 
         blobFile: {
           name: this.icon.name,
@@ -166,7 +166,7 @@ export default {
 
     async putCategoryDetail() {
       await axios.put(
-        `http://localhost:5000/api/CategoryDetail/${this.novaCategoriaDetail.id}`,
+        `https://salvadorcapsapi.azurewebsites.net/api/CategoryDetail/${this.novaCategoriaDetail.id}`,
         {
           categoryID: this.categoryID,
           name: this.novaCategoriaDetail.name,
@@ -185,7 +185,7 @@ export default {
     },
 
     async putCategoryDetailIcon() {
-      await axios.put(`http://localhost:5000/api/CategoryDetailImage/${this.novaCategoriaDetail.titleIconID}`, {
+      await axios.put(`https://salvadorcapsapi.azurewebsites.net/api/CategoryDetailImage/${this.novaCategoriaDetail.titleIconID}`, {
         categoryDetailID: +this.categoryDetail.id,
         blobFile: {
           name: this.icon.name ?? " ",
@@ -195,7 +195,7 @@ export default {
     },
 
     async getLastCategoryDetailID() {
-      await axios.get(`http://localhost:5000/api/CategoryDetail`)
+      await axios.get(`https://salvadorcapsapi.azurewebsites.net/api/CategoryDetail`)
       .then((response) => this.categoryDetailID = response.data[response.data.length - 1]?.id)
     }
   },

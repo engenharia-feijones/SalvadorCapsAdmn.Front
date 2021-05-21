@@ -201,7 +201,7 @@ export default {
 
     async postCategoria() {
       await axios
-        .post(`http://localhost:5000/api/Category`, {
+        .post(`https://salvadorcapsapi.azurewebsites.net/api/Category`, {
           name: this.categoriasNovas.name,
         })
         .then(async () => {
@@ -228,7 +228,7 @@ export default {
 
     async putCategoria() {
       await axios
-        .put(`http://localhost:5000/api/Category/${this.categoriasNovas.id}`, {
+        .put(`https://salvadorcapsapi.azurewebsites.net/api/Category/${this.categoriasNovas.id}`, {
           name: this.categoriasNovas.name,
         })
         .then(async () => {
@@ -275,13 +275,13 @@ export default {
     },
 
     async getLastCategoryId() {
-      await axios.get(`http://localhost:5000/api/Category`).then((response) => {
+      await axios.get(`https://salvadorcapsapi.azurewebsites.net/api/Category`).then((response) => {
         this.categoryID = response.data[response.data.length - 1].id;
       });
     },
 
     async postCategoryImage(name, data, destination) {
-      await axios.post(`http://localhost:5000/api/CategoryImage`, {
+      await axios.post(`https://salvadorcapsapi.azurewebsites.net/api/CategoryImage`, {
         categoryID: this.categoryID,
         blobFile: {
           name: name ?? " ",
@@ -292,7 +292,7 @@ export default {
     },
 
     async putCategoryImage(categoryID, id, name, data, destination) {
-      await axios.put(`http://localhost:5000/api/CategoryImage/${id}`, {
+      await axios.put(`https://salvadorcapsapi.azurewebsites.net/api/CategoryImage/${id}`, {
         categoryID: +categoryID,
         blobFile: {
           name: name ?? " ",
@@ -304,7 +304,7 @@ export default {
     },
 
     async deleteCategoryImage(id) {
-      await axios.delete(`http://localhost:5000/api/CategoryImage/${id}`);
+      await axios.delete(`https://salvadorcapsapi.azurewebsites.net/api/CategoryImage/${id}`);
     },
 
     fecharModal() {

@@ -149,7 +149,7 @@ export default {
     },
 
     async getLastBrandID() {
-      await axios.get(`http://localhost:5000/api/Brand`).then((response) => {
+      await axios.get(`https://salvadorcapsapi.azurewebsites.net/api/Brand`).then((response) => {
         this.brandID = response.data[response.data.length - 1].id;
       });
     },
@@ -160,7 +160,7 @@ export default {
     },
 
     async getBrand() {
-      await axios.get(`http://localhost:5000/api/Brand`).then((response) => {
+      await axios.get(`https://salvadorcapsapi.azurewebsites.net/api/Brand`).then((response) => {
         this.brands = response.data;
       });
     },
@@ -172,7 +172,7 @@ export default {
 
     async deleteBrand() {
       await axios
-        .delete(`http://localhost:5000/api/Brand/${this.deleteTemp.id}`)
+        .delete(`https://salvadorcapsapi.azurewebsites.net/api/Brand/${this.deleteTemp.id}`)
         .then(() => {
           this.deleteModal = false
           document.location.reload(true);

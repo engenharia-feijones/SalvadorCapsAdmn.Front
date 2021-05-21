@@ -153,7 +153,7 @@ export default {
 
     async editProduct(temp) {
       await axios
-        .get(`http://localhost:5000/api/Product/${temp.id}`)
+        .get(`https://salvadorcapsapi.azurewebsites.net/api/Product/${temp.id}`)
         .then((response) => {
           this.productTemp = response.data;
           this.editModal = !this.editModal;
@@ -164,7 +164,7 @@ export default {
       this.loading = true;
       this.show = false;
       await axios
-        .get(`http://localhost:5000/api/Product`)
+        .get(`https://salvadorcapsapi.azurewebsites.net/api/Product`)
         .then(async (response) => {
           this.products = await response.data;
           this.loading = false;
@@ -174,7 +174,7 @@ export default {
 
     async deleteProduct() {
       await axios
-        .delete(`http://localhost:5000/api/Product/${this.productTemp.id}`)
+        .delete(`https://salvadorcapsapi.azurewebsites.net/api/Product/${this.productTemp.id}`)
         .then(() => {
           this.deleteModal = !this.deleteModal;
           this.filtredProducts = this.filtredProducts.filter(
@@ -189,7 +189,7 @@ export default {
     },
 
     async getCategory() {
-      await axios.get(`http://localhost:5000/api/Category`).then((response) => {
+      await axios.get(`https://salvadorcapsapi.azurewebsites.net/api/Category`).then((response) => {
         this.searchCategory = response.data;
         this.searchCategory.forEach(
           (category) =>
@@ -207,7 +207,7 @@ export default {
           (category) => category.name === this.selectedSearchCategory
         )[0].id;
         await axios
-          .get(`http://localhost:5000/api/Product/?categoryID=${categoryID}`)
+          .get(`https://salvadorcapsapi.azurewebsites.net/api/Product/?categoryID=${categoryID}`)
           .then((response) => {
             (this.products = response.data)
             console.log(response.data)

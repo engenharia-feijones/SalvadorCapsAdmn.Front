@@ -216,7 +216,7 @@ export default {
 
     async postBrand() {
       await axios
-        .post(`http://localhost:5000/api/Brand`, {
+        .post(`https://salvadorcapsapi.azurewebsites.net/api/Brand`, {
           name: this.brand.name,
         })
         .then(async () => {
@@ -243,7 +243,7 @@ export default {
 
     async putBrand() {
       await axios
-        .put(`http://localhost:5000/api/Brand/${this.brand.id}`, {
+        .put(`https://salvadorcapsapi.azurewebsites.net/api/Brand/${this.brand.id}`, {
           name: this.brand.name,
         })
         .then(async () => {
@@ -287,13 +287,13 @@ export default {
     },
 
     async getLastBrandID() {
-      await axios.get(`http://localhost:5000/api/Brand`).then((response) => {
+      await axios.get(`https://salvadorcapsapi.azurewebsites.net/api/Brand`).then((response) => {
         this.lastBrandID = response.data[response.data.length - 1].id;
       });
     },
 
     async postBrandImage(name, data, destination) {
-      await axios.post(`http://localhost:5000/api/BrandImage`, {
+      await axios.post(`https://salvadorcapsapi.azurewebsites.net/api/BrandImage`, {
         brandID: this.lastBrandID,
         blobFile: {
           name: name,
@@ -304,7 +304,7 @@ export default {
     },
 
     async putBrandImage(id, name, data, destination) {
-      await axios.put(`http://localhost:5000/api/BrandImage/${id}`, {
+      await axios.put(`https://salvadorcapsapi.azurewebsites.net/api/BrandImage/${id}`, {
         brandID: this.brand.id,
         blobFile: {
           name: name,

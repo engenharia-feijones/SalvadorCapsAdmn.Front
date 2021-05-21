@@ -134,7 +134,7 @@ export default {
       this.loading = true;
       await axios
         .get(
-          `http://localhost:5000/api/CategoryDetail/?categoryID=${this.$route.params.id}`
+          `https://salvadorcapsapi.azurewebsites.net/api/CategoryDetail/?categoryID=${this.$route.params.id}`
         )
         .then((response) => {
           this.details = response.data;
@@ -145,7 +145,7 @@ export default {
 
     async getCategorys() {
       await axios
-        .get(`http://localhost:5000/api/category`)
+        .get(`https://salvadorcapsapi.azurewebsites.net/api/category`)
         .then((response) => (this.categorys = response.data));
     },
 
@@ -157,7 +157,7 @@ export default {
     async deleteCategoryDetail() {
       await axios
         .delete(
-          `http://localhost:5000/api/CategoryDetail/${this.detailTemp.id}`
+          `https://salvadorcapsapi.azurewebsites.net/api/CategoryDetail/${this.detailTemp.id}`
         )
         .then(() => {
           this.dialogDeletarDetailCategory = false;
