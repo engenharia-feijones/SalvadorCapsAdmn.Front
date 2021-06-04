@@ -69,7 +69,6 @@ export default {
   },
   methods: {
     autenticacao() {
-      console.log(this.$refs.form.validate())
       if (this.$refs.form.validate()) {
         if (this.usuario.login === 'adm' && this.usuario.password === 'admin') {
             localStorage.setItem('autenticado', true)

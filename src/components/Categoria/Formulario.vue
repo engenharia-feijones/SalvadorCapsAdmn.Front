@@ -23,85 +23,81 @@
       <v-card-text>
         <v-container>
           <v-row>
-            <v-col cols="12" sm="4" md="12">
-              <v-text-field v-model="categoriasNovas.name" label="Nome">
+            <v-col cols="12" sm="12" md="12">
+              <v-text-field
+                v-model="categoriasNovas.name"
+                label="Nome"
+                prepend-icon="mdi-plus"
+              >
               </v-text-field>
             </v-col>
 
             <!-- UPLOAD DESKTOP -->
-            <v-col cols="12" sm="6" md="12" lg="12">
-              <v-btn small fab class="txtBtn">
-                <v-file-input
-                  v-model="imagePreviewDesktop"
-                  @change="previewImageDesktop"
-                  class="ml-2 mb-2"
-                  prepend-icon="mdi-remote-desktop"
-                  filled
-                  hide-input
-                >
-                </v-file-input>
-              </v-btn>
-              <label class="ml-4">Imagem Desktop</label>
+            <v-col cols="12">
+              <v-file-input
+                v-model="imagePreviewDesktop"
+                @change="readBase64Desktop"
+                prepend-icon="mdi-remote-desktop"
+                label="Imagem Desktop"
+              >
+              </v-file-input>
               <v-row
                 v-if="imagePreviewDesktop"
                 justify="center"
                 align="center"
                 align-md="baseline"
-                class="mt-3 elevation-2"
               >
                 <v-col cols="3">
                   <v-img
                     width="3rem"
                     height="50px"
-                    :src="categoriasNovas.desktopPreviewImage"
+                    :src="base64Desktop.image"
                   ></v-img>
                 </v-col>
-                <v-col cols="3">
-                  <p>{{ categoriasNovas.desktopPreviewName }}</p>
-                </v-col>
-                <!-- <v-col cols="3">
-                  <p>{{ categoriasNovas.desktopSize }}</p>
-                </v-col> -->
                 <v-col cols="2">
-                  <v-btn x-small @click="removerPreview('Desktop')">X</v-btn>
+                  <v-btn
+                    color="red"
+                    dark
+                    height="2rem"
+                    width="2rem"
+                    small
+                    @click="removePreview('Desktop')"
+                    >X</v-btn
+                  >
                 </v-col>
               </v-row>
             </v-col>
             <!-- END UPLOAD DESKTOP -->
 
             <!-- START UPLOAD MOBILE -->
-            <v-col cols="12" sm="6" md="12" lg="12">
-              <v-btn small fab class="txtBtn">
-                <v-file-input
-                  @change="previewImageMobile"
-                  class="ml-2 mb-2"
-                  prepend-icon="mdi-cellphone"
-                  filled
-                  hide-input
-                  v-model="imagePreviewMobile"
-                >
-                </v-file-input>
-              </v-btn>
-              <label class="ml-4">Imagem Mobile</label>
+            <v-col cols="12">
+              <v-file-input
+                @change="readBase64Mobile"
+                prepend-icon="mdi-cellphone"
+                v-model="imagePreviewMobile"
+                label="Imagem Mobile"
+              >
+              </v-file-input>
               <v-row
                 v-if="imagePreviewMobile"
                 justify="center"
                 align="center"
                 align-md="baseline"
-                class="mt-3 elevation-2"
               >
                 <v-col cols="3">
                   <v-img
                     width="3rem"
                     height="50px"
-                    :src="categoriasNovas.mobilePreviewImage"
+                    :src="base64Mobile.image"
                   ></v-img>
                 </v-col>
-                <v-col cols="3">
-                  <p>{{ categoriasNovas.mobilePreviewName }}</p>
-                </v-col>
+               
                 <v-col cols="2">
-                  <v-btn x-small @click="removerPreview('Mobile')">X</v-btn>
+                  <v-btn color="red"
+                  dark
+                  height="2rem"
+                  width="2rem"
+                  small @click="removePreview('Mobile')">X</v-btn>
                 </v-col>
               </v-row>
             </v-col>
@@ -116,16 +112,16 @@
               <v-btn
                 text
                 color="blue"
-                @click="putCategoria"
-                :disabled="desativarBtn"
+                @click="handleUpdateCategory"
+                :disabled="disableBtn"
                 v-if="editarCategoria"
                 ><v-icon>mdi-check</v-icon>Editar</v-btn
               >
               <v-btn
                 text
                 color="blue"
-                @click="postCategoria"
-                :disabled="desativarBtn"
+                @click="handleCreateCategory"
+                :disabled="disableBtn"
                 v-else
                 ><v-icon>mdi-check</v-icon>Salvar</v-btn
               >
@@ -139,22 +135,33 @@
 </template>
 
 <script>
-import axios from "axios";
+import { createNamespacedHelpers } from "vuex";
+const { mapActions } = createNamespacedHelpers("categorys");
 
 export default {
   name: "Formulario",
 
   data: () => ({
-    desativarBtn: true,
+    disableBtn: true,
 
     imagePreviewDesktop: null,
     imagePreviewMobile: null,
-    // TODO: REFACT THESE VARIABLE
+
+    base64Desktop: {
+      name: null,
+      data: null,
+      image: null,
+    },
+
+    base64Mobile: {
+      name: null,
+      data: null,
+      image: null,
+    },
+
     categoriasNovas: {
       nome: "",
     },
-
-    categoryID: 0,
   }),
 
   props: {
@@ -164,154 +171,82 @@ export default {
   },
 
   methods: {
-    async previewImageDesktop(file) {
+    ...mapActions(["createCategory", "updateCategory"]),
+    readBase64Desktop(file) {
+      if (!file) return;
       const reader = new FileReader();
 
-      this.categoriasNovas.desktopPreviewName = file.name;
-
-      await reader.readAsDataURL(file);
-      reader.onloadend = () => {
-        this.categoriasNovas.desktopBlob = reader.result
-          ?.toString()
-          .replace("data:", "")
-          .replace(/^.+,/, "");
-        this.categoriasNovas.desktopPreviewImage = `data:image/jpeg;charset=utf-8;base64,${this.categoriasNovas.desktopBlob}`;
-      };
-    },
-
-    previewImageMobile(file) {
-      const reader = new FileReader();
-      this.categoriasNovas.mobilePreviewName = file.name;
+      this.base64Desktop.name = file.name;
 
       reader.readAsDataURL(file);
       reader.onloadend = () => {
-        this.categoriasNovas.mobileBlob = reader.result
+        this.base64Desktop.data = reader.result
           ?.toString()
           .replace("data:", "")
           .replace(/^.+,/, "");
-        this.categoriasNovas.mobilePreviewImage = `data:image/jpeg;charset=utf-8;base64,${this.categoriasNovas.mobileBlob}`;
+        this.base64Desktop.image = reader.result;
       };
     },
 
-    removerPreview(imgType) {
-      imgType === "Desktop"
-        ? (this.imagePreviewDesktop = null)
-        : (this.imagePreviewMobile = null);
+    readBase64Mobile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      this.base64Mobile.name = file.name;
+
+      reader.readAsDataURL(file);
+      reader.onloadend = () => {
+        this.base64Mobile.data = reader.result
+          ?.toString()
+          .replace("data:", "")
+          .replace(/^.+,/, "");
+        this.base64Mobile.image = reader.result;
+      };
     },
 
-    async postCategoria() {
-      await axios
-        .post(`https://salvadorcapsapi.azurewebsites.net/api/Category`, {
-          name: this.categoriasNovas.name,
-        })
-        .then(async () => {
-          await this.getLastCategoryId();
-          if (this.imagePreviewDesktop) {
-            await this.postCategoryImage(
-              this.categoriasNovas.desktopPreviewName,
-              this.categoriasNovas.desktopBlob,
-              1
-            );
-          }
+    handleClicks() {
+      if (this.disableBtn) return;
 
-          if (this.imagePreviewMobile) {
-            await this.postCategoryImage(
-              this.categoriasNovas.mobilePreviewName,
-              this.categoriasNovas.mobileBlob,
-              2
-            );
-          }
-        });
-      this.$emit("cadastro-feito");
-      this.fecharModal();
+      this.disableBtn = true;
+      setTimeout(() => (this.disableBtn = false), 600);
     },
 
-    async putCategoria() {
-      await axios
-        .put(`https://salvadorcapsapi.azurewebsites.net/api/Category/${this.categoriasNovas.id}`, {
-          name: this.categoriasNovas.name,
-        })
-        .then(async () => {
-          if (this.imagePreviewDesktop) {
-            if (this.categoriasNovas.desktopSpotlightImageID) {
-              await this.putCategoryImage(
-                this.categoriasNovas.id,
-                this.categoriasNovas.desktopSpotlightImageID,
-                this.categoriasNovas.desktopPreviewName,
-                this.categoriasNovas.desktopBlob,
-                1
-              );
-            } else {
-              this.categoryID = this.categoriasNovas.id;
-              await this.postCategoryImage(
-                this.categoriasNovas.desktopPreviewName,
-                this.categoriasNovas.desktopBlob,
-                1
-              );
-            }
-          }
-
-          if (this.imagePreviewMobile) {
-            if (this.categoriasNovas.mobileSpotlightImageID) {
-              await this.putCategoryImage(
-                this.categoriasNovas.id,
-                this.categoriasNovas.mobileSpotlightImageID,
-                this.categoriasNovas.mobilePreviewName,
-                this.categoriasNovas.mobileBlob,
-                2
-              );
-            } else {
-              this.categoryID = this.categoriasNovas.id;
-              await this.postCategoryImage(
-                this.categoriasNovas.mobilePreviewName,
-                this.categoriasNovas.mobileBlob,
-                2
-              );
-            }
-          }
-        });
-      this.$emit("update-feito");
-      this.fecharModal();
+    removePreview(imgType) {
+      if (imgType === "Desktop") {
+        this.imagePreviewDesktop = null;
+        this.base64Desktop = {
+          name: null,
+          data: null,
+          image: null,
+        };
+      } else {
+        this.base64Mobile = {
+          name: null,
+          data: null,
+          image: null,
+        };
+        this.imagePreviewMobile = null;
+      }
     },
 
-    async getLastCategoryId() {
-      await axios.get(`https://salvadorcapsapi.azurewebsites.net/api/Category`).then((response) => {
-        this.categoryID = response.data[response.data.length - 1].id;
+    async handleCreateCategory() {
+      this.handleClicks();
+      this.$emit("create-category-data", {
+        ...this.categoriasNovas,
+        blobDesktopSpotlightImage: this.base64Desktop,
+        blobMobileSpotlightImage: this.base64Mobile,
       });
     },
 
-    async postCategoryImage(name, data, destination) {
-      await axios.post(`https://salvadorcapsapi.azurewebsites.net/api/CategoryImage`, {
-        categoryID: this.categoryID,
-        blobFile: {
-          name: name ?? " ",
-          data: data ?? " ",
-        },
-        destination: destination,
+    async handleUpdateCategory() {
+      this.handleClicks();
+      this.$emit("update-category-data", {
+        ...this.categoriasNovas,
+        blobDesktopSpotlightImage: this.base64Desktop,
+        blobMobileSpotlightImage: this.base64Mobile,
       });
-    },
-
-    async putCategoryImage(categoryID, id, name, data, destination) {
-      await axios.put(`https://salvadorcapsapi.azurewebsites.net/api/CategoryImage/${id}`, {
-        categoryID: +categoryID,
-        blobFile: {
-          name: name ?? " ",
-          data: data ?? " ",
-        },
-        destination: destination,
-      });
-      // .then(this.deleteCategoryImage(id));
-    },
-
-    async deleteCategoryImage(id) {
-      await axios.delete(`https://salvadorcapsapi.azurewebsites.net/api/CategoryImage/${id}`);
     },
 
     fecharModal() {
-      this.categoriasNovas = {};
-
-      this.imagePreviewDesktop = null;
-      this.imagePreviewMobile = null;
       this.$emit("fechar-formulario");
     },
   },
@@ -319,13 +254,13 @@ export default {
   watch: {
     "categoriasNovas.name"() {
       this.categoriasNovas.name
-        ? (this.desativarBtn = false)
-        : (this.desativarBtn = true);
+        ? (this.disableBtn = false)
+        : (this.disableBtn = true);
     },
   },
 
   async created() {
-    this.categoriasNovas = this.editarCategoria ?? {
+    this.categoriasNovas = { ...this.editarCategoria } ?? {
       name: "",
       desktopSpotlight: "",
       desktopSpotlightImageID: "",
@@ -333,21 +268,7 @@ export default {
       mobileSpotlight: "",
       mobileSpotlightImageID: "",
       mobileSpotlightImage: "",
-      desktopPreviewName: "",
-      desktopPreviewImage: "",
-      mobilePreviewName: "",
-      mobilePreviewImage: "",
     };
-
-    if (this.editarCategoria) {
-      this.categoriasNovas = {
-        ...this.categoriasNovas,
-        desktopPreviewName: "",
-        desktopPreviewImage: "",
-        mobilePreviewName: "",
-        mobilePreviewImage: "",
-      };
-    }
   },
 };
 </script>

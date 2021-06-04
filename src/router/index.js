@@ -1,9 +1,9 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Marca from '@/views/Marca/Marca'
-import Categoria from '@/views/Categoria/CategoriaView'
-import CategoriaDetail from '@/views/Categoria/CategoriaDetailView'
-import Produtos from '@/views/Produtos/ProdutosView'
+import Categoria from '@/views/Categoria/Categoria'
+import CategoriaDetail from '@/views/CategoriaDetail/CategoriaDetail'
+import Produtos from '@/views/Produtos/Produtos'
 import Login from '@/views/Login/LoginView'
 
 Vue.use(VueRouter)
@@ -55,7 +55,6 @@ router.beforeEach((to, from, next) => {
     }
     next()
 
-    console.log(autenticado)
   })
 
 export default router
