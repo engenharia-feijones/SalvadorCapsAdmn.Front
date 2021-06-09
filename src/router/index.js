@@ -1,60 +1,31 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Marca from '@/views/Marca/Marca'
-import Categoria from '@/views/Categoria/Categoria'
-import CategoriaDetail from '@/views/CategoriaDetail/CategoriaDetail'
-import Produtos from '@/views/Produtos/Produtos'
-import Login from '@/views/Login/LoginView'
 
 Vue.use(VueRouter)
 
 const routes = [
-    {
-        path: "/",
-        name: "Login",
-        component: Login,
-    },
-    {
-        path: '/marca',
-        name: 'Marca',
-        component: Marca
-    },
-    {
-        path: '/categoria',
-        name: 'Categoria',
-        component: Categoria
-    },
-    {
-        path: '/categoriaDetalhes/:id',
-        name: 'CategoriaDetalhe',
-        component: CategoriaDetail
-    },
-    {
-        path: '/produtos',
-        name: "Produto",
-        component: Produtos
-    }
+  {
+    path: '/',
+    name: 'Home',
+    // Carrega somente quando o component ou view for acessada
+    component: () => import(/* webpackChunkName: "about" */ '../views/Home.vue')
+  },
+  {
+    path: '/:brandName',
+    name: 'Products',
+    // Carrega somente quando o component ou view for acessada
+    component: () => import(/* webpackChunkName: "about" */ '../views/Products.vue')
+  },
+  {
+    path: "/detalhes/:id",
+    name: "ProductsDetails",
+    component: () => import(/* webpackChunkName: "about" */ "../views/ProductsDetails.vue")
+  }
 ]
-
+// mode: 'history' =  Remove tralha(#) da url
 const router = new VueRouter({
-    routes
+  mode: 'history',
+  routes
 })
-
-router.beforeEach((to, from, next) => {
-    // ...
-    let autenticado = localStorage.getItem('autenticado') ? true : false
-    if (to.name !== 'Login') {
-      if (!autenticado) {
-        next({name: 'Login'})
-      }
-    } else {
-      if (autenticado) {
-        // localStorage.removeItem('autenticado')
-        next({name: 'Marca'})
-      }
-    }
-    next()
-
-  })
 
 export default router
