@@ -1,5 +1,5 @@
 {
-  "name": "salvadorcaps",
+  "name": "admsalvadorcaps",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,31 +9,25 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
-    "babel-eslint": "^10.1.0",
-    "cache-loader": "^4.1.0",
     "core-js": "^3.6.5",
     "vue": "^2.6.11",
-    "vue-loader": "^15.9.7",
-    "vue-router": "^3.2.0",
-    "vuetify": "^2.4.0"
+    "vue-router": "^3.5.1",
+    "vue-the-mask": "^0.11.1",
+    "vuetify": "^2.4.0",
+    "vuex": "^3.6.2"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^4.5.12",
-    "@vue/cli-plugin-router": "~4.5.0",
+    "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-plugin-eslint": "~4.5.0",
     "@vue/cli-service": "~4.5.0",
-    "@vue/eslint-config-standard": "^5.1.2",
+    "babel-eslint": "^10.1.0",
     "eslint": "^6.7.2",
-    "eslint-plugin-import": "^2.20.2",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.0",
     "eslint-plugin-vue": "^6.2.2",
     "sass": "^1.32.0",
     "sass-loader": "^10.0.0",
-    "vue-cli-plugin-vuetify": "^2.3.1",
+    "vue-cli-plugin-vuetify": "~2.4.0",
     "vue-template-compiler": "^2.6.11",
-    "vuetify-loader": "^1.7.0",
-    "webpack": "^4.3.0"
+    "vuetify-loader": "^1.7.0"
   },
   "eslintConfig": {
     "root": true,
@@ -41,67 +35,13 @@
       "node": true
     },
     "extends": [
-      "plugin:vue/strongly-recommended",
-      "@vue/standard"
+      "plugin:vue/essential",
+      "eslint:recommended"
     ],
     "parserOptions": {
       "parser": "babel-eslint"
     },
-    "rules": {
-      "vue/no-async-in-computed-properties": "warn",
-      "vue/no-dupe-keys": "warn",
-      "vue/no-duplicate-attributes": "warn",
-      "vue/no-parsing-error": "warn",
-      "vue/no-reserved-keys": "warn",
-      "vue/no-shared-component-data": "warn",
-      "vue/no-side-effects-in-computed-properties": "warn",
-      "vue/no-template-key": "warn",
-      "vue/no-textarea-mustache": "warn",
-      "vue/no-unused-components": "warn",
-      "vue/no-unused-vars": "warn",
-      "vue/no-use-v-if-with-v-for": "warn",
-      "vue/require-component-is": "warn",
-      "vue/require-prop-type-constructor": "warn",
-      "vue/require-render-return": "warn",
-      "vue/require-v-for-key": "warn",
-      "vue/require-valid-default-prop": "warn",
-      "vue/return-in-computed-property": "warn",
-      "vue/use-v-on-exact": "warn",
-      "vue/valid-template-root": "warn",
-      "vue/valid-v-bind": "warn",
-      "vue/valid-v-cloak": "warn",
-      "vue/valid-v-else-if": "warn",
-      "vue/valid-v-else": "warn",
-      "vue/valid-v-for": "warn",
-      "vue/valid-v-html": "warn",
-      "vue/valid-v-if": "warn",
-      "vue/valid-v-model": "warn",
-      "vue/valid-v-on": "warn",
-      "vue/valid-v-once": "warn",
-      "vue/valid-v-pre": "warn",
-      "vue/valid-v-show": "warn",
-      "vue/valid-v-text": "warn",
-      "vue/attribute-hyphenation": "warn",
-      "vue/html-closing-bracket-newline": "warn",
-      "vue/html-closing-bracket-spacing": "warn",
-      "vue/html-end-tags": "warn",
-      "vue/html-indent": "warn",
-      "vue/html-quotes": "warn",
-      "vue/html-self-closing": "warn",
-      "vue/max-attributes-per-line": "warn",
-      "vue/multiline-html-element-content-newline": "warn",
-      "vue/mustache-interpolation-spacing": "warn",
-      "vue/name-property-casing": "warn",
-      "vue/no-multi-spaces": "warn",
-      "vue/no-spaces-around-equal-signs-in-attribute": "warn",
-      "vue/no-template-shadow": "warn",
-      "vue/prop-name-casing": "warn",
-      "vue/require-default-prop": "warn",
-      "vue/require-prop-types": "warn",
-      "vue/singleline-html-element-content-newline": "warn",
-      "vue/v-bind-style": "warn",
-      "vue/v-on-style": "warn"
-    }
+    "rules": {}
   },
   "browserslist": [
     "> 1%",
