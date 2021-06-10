@@ -70,6 +70,7 @@
         <v-card v-if="stepper == 2">
           <v-treeview
             selectable
+            open-all
             open-on-click
             transition
             :hoverable="true"
