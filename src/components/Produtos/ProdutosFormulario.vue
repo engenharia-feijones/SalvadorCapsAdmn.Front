@@ -82,7 +82,7 @@
         </v-card>
       </v-stepper-content>
 
-      <v-stepper-step editable step="3">Images Do Produto </v-stepper-step>
+      <v-stepper-step editable step="3">Images do Produto </v-stepper-step>
       <v-stepper-content step="3">
         <v-card>
           <div v-if="editProduct">
